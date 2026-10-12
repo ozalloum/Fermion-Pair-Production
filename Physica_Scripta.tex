@@ -1,5 +1,5 @@
 % Physica Scripta manuscript: cross-validation and numerical error analysis.
-\documentclass{iopjournal}
+\documentclass[anonymous]{iopjournal}
 
 \usepackage[numbers]{natbib}
 \usepackage{amsmath,amssymb,bm}
@@ -9,19 +9,18 @@
 \setlength{\emergencystretch}{1em}
 
 \newcommand{\sech}{\operatorname{sech}}
-\newcommand{\PairPulse}{\textsc{PairPulse}}
 
 % Submission presentation: omit template publication metadata and Crossmark dates.
 \fancyhead[L]{\small\sf Physica Scripta}
-\fancyhead[R]{\small O. H. Y. Zalloum}
+\fancyhead[R]{}
 \renewcommand{\articletype}[1]{\vspace*{-8mm}\noindent{\Large\sf Physica Scripta}\par\vspace*{8mm}\noindent{\scriptsize\sf\bfseries\MakeUppercase{#1}}\par}
-\hypersetup{pdftitle={Fermion pair production in pulsed electric fields: cross-validation of Dirac and quantum-kinetic calculations},pdfauthor={Othman H. Y. Zalloum}}
+\hypersetup{pdftitle={Fermion pair production in pulsed electric fields: cross-validation of Dirac and quantum-kinetic calculations},pdfauthor={},pdfsubject={},pdfkeywords={},pdfcreator={LaTeX}}
 
 % Keep running heads consistent on pages assigned the plain style.
 \fancypagestyle{plain}{%
   \fancyhead[L]{\small\sf Physica Scripta}%
   \fancyhead[C]{}%
-  \fancyhead[R]{\small O. H. Y. Zalloum}%
+  \fancyhead[R]{}%
   \fancyfoot[L]{}\fancyfoot[R]{}\fancyfoot[C]{\thepage}%
 }
 \begin{document}
@@ -30,19 +29,13 @@
 
 \title{Fermion pair production in pulsed electric fields: cross-validation of Dirac and quantum-kinetic calculations}
 
-\author{Othman H. Y. Zalloum$^{1,*}$\orcid{0000-0001-7282-1332}}
-
-\affil{$^1$Department of Applied Mathematics and Physics, Palestine Polytechnic University, Hebron, Palestine}
-
-\affil{$^*$Author to whom any correspondence should be addressed.}
-
-\email{ozalloum@ppu.edu}
+\author{}
 
 \keywords{fermion pair production, pulsed electric fields, Dirac equation, quantum kinetic theory, numerical convergence}
 
 
 \begin{abstract}
-Reliable fermion pair-production spectra in pulsed electric fields require control of time integration, finite pulse windows and momentum discretization. We compare direct Dirac-mode evolution with the equivalent quantum-kinetic equations for prescribed, spatially homogeneous fields in one spatial dimension. Both formulations use a common instantaneous-vacuum convention and are tested against the exact asymptotic Sauter spectrum. For the reference pulse, their maximum absolute occupation errors on 41 momentum modes are below $8\times10^{-13}$; increasing the integration half-width from six to twelve pulse durations reduces the zero-momentum discrepancy by more than five orders of magnitude. A separated two-pulse field gives agreement between formulations within $1.18\times10^{-13}$. An additional set of 1,962 mode evaluations tests integration controls, endpoints, pulse parameters, a Gaussian profile and momentum-integrated densities. Across nine Sauter parameter pairs, the maximum absolute occupation error at refined settings is $4.58\times10^{-15}$. Grid and domain refinements satisfy a prescribed $10^{-4}$ relative density criterion. These results distinguish agreement between state representations from convergence to asymptotic observables: small conservation errors and agreement between solvers do not alone control finite-window or momentum-domain bias. The accompanying \PairPulse{} implementation makes the equations, numerical conventions and validation procedure reproducible for the tested homogeneous-field models.
+Reliable fermion pair-production spectra in pulsed electric fields require control of time integration, finite pulse windows and momentum discretization. We compare direct Dirac-mode evolution with the equivalent quantum-kinetic equations for prescribed, spatially homogeneous fields in one spatial dimension. Both formulations use a common instantaneous-vacuum convention and are tested against the exact asymptotic Sauter spectrum. For the reference pulse, their maximum absolute occupation errors on 41 momentum modes are below $8\times10^{-13}$; increasing the integration half-width from six to twelve pulse durations reduces the zero-momentum discrepancy by more than five orders of magnitude. A separated two-pulse field gives agreement between formulations within $1.18\times10^{-13}$. An additional set of 1,962 mode evaluations tests integration controls, endpoints, pulse parameters, a Gaussian profile and momentum-integrated densities. Across nine Sauter parameter pairs, the maximum absolute occupation error at refined settings is $4.58\times10^{-15}$. Grid and domain refinements satisfy a prescribed $10^{-4}$ relative density criterion. These results distinguish agreement between state representations from convergence to asymptotic observables: small conservation errors and agreement between solvers do not alone control finite-window or momentum-domain bias. The accompanying implementation makes the equations, numerical conventions and validation procedure reproducible for the tested homogeneous-field models.
 \end{abstract}
 
 \section{Introduction}
@@ -53,7 +46,7 @@ For a time-dependent field, the final momentum spectrum depends on the pulse his
 
 The numerical question addressed here is how to distinguish agreement between two equivalent evolution equations from accuracy of the resulting asymptotic spectrum and integrated density. A calculation can preserve its norm or kinetic invariant while retaining a bias from finite initialization and measurement times. Two solvers can also agree on a finite momentum grid while omitting a contribution to the density outside that grid. These issues call for separate tests of state evolution, temporal endpoints and momentum integration.
 
-We compare a two-component Dirac equation with the full auxiliary-variable quantum-kinetic system under identical prescribed fields. The single Sauter pulse supplies an external benchmark; a separated two-pulse field and a Gaussian profile test agreement beyond that benchmark. Tolerance and step-cap refinements are distinguished from pulse-window, momentum-spacing and momentum-domain refinements. The contribution is a reproducible numerical assessment of these established formulations, with explicit conventions and quantified errors for the reported cases. The \PairPulse{} code supplies the implementation and reproduction materials. Section~\ref{sec:model} defines the physical model, Section~\ref{sec:software} specifies the numerical protocol, and Section~\ref{sec:results} presents the comparisons. Section~\ref{sec:discussion} discusses their implications and limits; implementation and execution details are collected in Appendix~\ref{app:reproduction}.
+We compare a two-component Dirac equation with the full auxiliary-variable quantum-kinetic system under identical prescribed fields. The single Sauter pulse supplies an external benchmark; a separated two-pulse field and a Gaussian profile test agreement beyond that benchmark. Tolerance and step-cap refinements are distinguished from pulse-window, momentum-spacing and momentum-domain refinements. The contribution is a reproducible numerical assessment of these established formulations, with explicit conventions and quantified errors for the reported cases. The accompanying code supplies the implementation and reproduction materials. Section~\ref{sec:model} defines the physical model, Section~\ref{sec:software} specifies the numerical protocol, and Section~\ref{sec:results} presents the comparisons. Section~\ref{sec:discussion} discusses their implications and limits. Detailed reproduction instructions accompany the computational materials.
 
 \section{Physical model and observables}
 \label{sec:model}
@@ -134,6 +127,8 @@ Both initial-value problems use SciPy's DOP853 implementation through \texttt{so
 For each mode, 257 equally spaced times in the integration interval are used to estimate the largest instantaneous frequency, $\widehat\omega_{\max}$. The maximum internal step is $c_h/\widehat\omega_{\max}$, with default $c_h=0.18$. This sampled cap limits steps on the estimated oscillation scale; it is an empirical control rather than a rigorous frequency bound for arbitrary pulse shapes. Changes in tolerance and $c_h$ are therefore tested independently.
 
 The Dirac and kinetic state equations are implemented separately but use the same time integrator, interval, tolerances and cap rule. Their agreement tests consistency of the state representations, while the exact Sauter result and independent refinement studies test errors that can be common to both. Pulse objects must supply consistent $E(t)$ and $A(t)$ and suitable endpoints. The software interface does not enforce those physical conditions automatically.
+
+The calculations were performed in Python using NumPy and SciPy. Source code, reproduction instructions, software requirements and execution checks are provided in the accompanying computational archive, including its \texttt{REPRODUCIBILITY.txt} notes.
 
 \subsection{Error measures and acceptance criteria}
 
@@ -305,54 +300,13 @@ The assessment uses established pair-production equations and does not propose a
 
 We have compared Dirac-mode and quantum-kinetic calculations of fermion pair production using a common definition of the finite-time vacuum and final occupation. The reference Sauter spectrum is reproduced with maximum absolute error below $8\times10^{-13}$ at the stated default controls, while nine parameter pairs give a maximum error of $4.58\times10^{-15}$ at refined settings. The separated-pulse spectrum agrees between formulations within $1.18\times10^{-13}$. The additional 1,962 mode evaluations separate integration-control, endpoint, pulse-profile and momentum-integration checks.
 
-The central numerical result is the distinction between consistency of state evolution and convergence of physical observables. In the reported cases, endpoint extension is essential for comparison with an asymptotic spectrum, and domain extension is essential for the double-pulse density even after momentum-spacing refinement. The final density checks meet the prescribed $10^{-4}$ relative criterion. The accompanying \PairPulse{} implementation provides a reproducible basis for these comparisons and for further validation within the stated homogeneous-field model.
+The central numerical result is the distinction between consistency of state evolution and convergence of physical observables. In the reported cases, endpoint extension is essential for comparison with an asymptotic spectrum, and domain extension is essential for the double-pulse density even after momentum-spacing refinement. The final density checks meet the prescribed $10^{-4}$ relative criterion. The accompanying implementation provides a reproducible basis for these comparisons and for further validation within the stated homogeneous-field model.
 
-\ack{The author acknowledges Palestine Polytechnic University for its support.}
-
-\funding{This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.}
-
-\roles{Othman H. Y. Zalloum: Conceptualization, Methodology, Software, Validation, Formal analysis, Investigation, Resources, Data curation, Visualization, Project administration, Writing--original draft, Writing--review and editing.}
-
-\data{The manuscript source, compiled manuscript, figure files, and a \PairPulse{} source-code archive containing the reproduction and validation scripts and notebook are available at \url{https://github.com/ozalloum/Fermion-Pair-Production}. The scripts generate the numerical datasets and diagnostics used by the computational workflow.}
+\section*{Data availability}
+The source code, detailed execution notes, reproduction and validation scripts, and notebook are supplied in the anonymised supplementary archive \texttt{Supplementary\_code.zip}. These scripts generate the numerical datasets and diagnostics used in this study. The public repository link is withheld from this review manuscript to preserve anonymity.
 
 \section*{Declaration of competing interest}
 The author declares that there are no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
-
-
-
-\FloatBarrier
-\appendix
-\section{Reproducibility and execution details}
-\label{app:reproduction}
-\setcounter{figure}{0}
-\renewcommand{\thefigure}{A\arabic{figure}}
-\renewcommand{\theHfigure}{A\arabic{figure}}
-
-\subsection{Implementation and generated records}
-
-\PairPulse{} separates pulse specification from mode evolution. Pulse objects expose $E(t)$, $A(t)$ and a finite integration window; the same solver routines accept a single Sauter pulse, a pulse train or a user-defined profile satisfying that interface. Source modules and reproduction materials are summarized in Figure~\ref{fig:package}, and Figure~\ref{fig:workflow} shows the sequence of calculations and checks. The diagrams describe the contents and workflow of the source-code archive. The repository stores that archive together with the manuscript sources and figure files in a flat directory.
-
-For each single-pulse mode, the reproduction output records the exact, Dirac and kinetic occupations, final-time conservation diagnostics and ordinary-differential-equation function-evaluation counts. Scripts generate spectra, integrated densities, pulse-tail data, the momentum--window map and environment metadata. The map records both occupations, the exact benchmark, errors and diagnostics in a comma-separated file. The \texttt{redraw\_figures.py} script can redraw numerical figures from generated data without repeating mode integrations. The accompanying notebook demonstrates the benchmark and separated-pulse calculations. Validation scripts retain mode records and summarize refinements and parameter sweeps.
-
-\begin{figure}[tp]
-  \centering
-  \includegraphics[width=0.82\textwidth]{figureA1_reproducibility_structure.pdf}
-  \caption{Organization of \PairPulse{} and its generated outputs. Source modules, tests, notebook, and run scripts are shown alongside the generated datasets, figures, manuscript, and checksum checks. The diagram is produced in Python from the package's declared file structure.}
-  \label{fig:package}
-\end{figure}
-
-\subsection{Execution and software checks}
-
-The reported numerical studies used Python 3.12.14, NumPy 2.3.5 and SciPy 1.17.0. A built wheel was installed in two isolated Windows environments: Python 3.12.14 with the reproduction libraries, and Python 3.10.20 with NumPy 1.24.0, SciPy 1.10.0 and Matplotlib 3.7.0. All eight tests passed in both environments. The tests cover the exact benchmark, kinetic invariant and occupation bounds, zero-field limit, pulse superposition, time translation, step-cap refinement and rejection of invalid controls or nonfinite pulse parameters.
-
-Separate hosted checks built and installed the package from source on Linux and Windows. On both systems, the notebook executed all four code cells in a Jupyter kernel, imported the installed package and produced no error outputs. These execution checks concern reproducibility of the software environment; the numerical validation is reported in Section~\ref{sec:results}. Each momentum mode is integrated separately in Python. The validation script can distribute modes among subprocess workers, but no performance-scaling claim is made.
-
-\begin{figure}[tp]
-  \centering
-  \includegraphics[width=0.65\textwidth]{figureA2_computational_workflow.pdf}
-  \caption{Computational workflow used to generate the reproducibility datasets and publication figures. Each momentum mode is evolved independently with the Dirac and quantum-kinetic systems; the exact Sauter result and conservation diagnostics are then used where applicable before data export, plotting, and manuscript compilation.}
-  \label{fig:workflow}
-\end{figure}
 
 \FloatBarrier
 \begin{thebibliography}{99}
