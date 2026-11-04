@@ -1,0 +1,22 @@
+PairPulse 0.2.2 execution notes
+
+The numerical results were obtained on Windows with Python 3.13.9, NumPy 2.3.5,
+SciPy 1.16.3, Matplotlib 3.10.6, QuTiP 5.2.2 and mpmath 1.3.0. The requirements
+files specify the software versions used for the calculations.
+
+The standard pip build could not complete on the validation machine because
+access to its temporary build directory was restricted. A wheel was built with
+setuptools and unpacked into an isolated import directory. The calculations
+and tests used that wheel, whose solver files match the distributed source.
+A successful standard pip installation is therefore not claimed by these tests.
+
+The standard notebook launcher also encountered a local Windows permission
+restriction. All four notebook cells subsequently executed in an authenticated
+local kernel using an existing connection file. The portable notebook command
+is scripts/execute_notebook.py; select the intended environment with --kernel-name.
+
+Validation results: 2,228 mode evaluations, 21 automated tests, 299 independent
+100-digit analytic comparisons, and the analytic derivation checks passed.
+A second check revalidated all stored mode records and repeated 11 representative
+mode integrations. These tests support the reported parameter sets; new fields
+and parameter ranges require their own convergence studies.

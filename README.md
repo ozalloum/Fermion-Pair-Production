@@ -1,34 +1,34 @@
-# Fermion pair production in pulsed electric fields
+# PairPulse
 
-Cross-validation of Dirac and quantum-kinetic calculations.
+PairPulse is a Python package for fermion pair-production spectra and one-dimensional densities in prescribed homogeneous electric fields. Version 0.2.2 includes Dirac and quantum-kinetic mode solvers, a stable analytic Sauter benchmark, and separate studies of integration, endpoint and momentum-integration convergence.
 
-**Othman H. Y. Zalloum**  
-Department of Applied Mathematics and Physics, Palestine Polytechnic University, Hebron, Palestine
+The [manuscript](manuscript.pdf) develops the theoretical conventions and derivations, presents the numerical results, and explains their scope. Its [LaTeX source](manuscript.tex) and figure PDFs are included.
 
-## Manuscript and code
+## Code and data
 
-- [Manuscript PDF](manuscript.pdf)
-- [LaTeX source](manuscript.tex)
-- [Source code and reproduction materials](Supplementary_code.zip)
-- [File checksums](CHECKSUMS.sha256)
+- [Complete manuscript and computational package](PairPulse_CPC_package_v0.2.2.zip) — article PDF and LaTeX, figures, software, numerical data, user guide and equation-source verification.
+- [Computational materials](Computational_materials/) — source, tests, calculation scripts and demonstration notebook.
+- [User guide](USER_GUIDE.txt) — installation, numerical controls and reproduction commands.
+- [Numerical data](data/) — the records underlying the manuscript figures and validation tables.
+- [Source archive](PairPulse_source.zip) — source and user guide.
+- [Software and data supplement](Supplementary_code.zip) — source, guide and supporting numerical data.
 
-The manuscript uses the standard LaTeX article class and four vector figures. References are embedded in the source. Two additional technical diagrams describe the reproducibility structure and computational workflow.
+The source code is distributed under the [MIT license](LICENSE).
 
-## Compile
+## Reproducing the results
 
-Keep `manuscript.tex` and the four scientific figure PDFs in the same directory, then run:
+Create and activate a Python virtual environment, then run:
 
 ```sh
-pdflatex manuscript.tex
-pdflatex manuscript.tex
+cd Computational_materials
+python -m pip install -r requirements-validation.txt .
+python -m unittest discover -s tests -v
+python scripts/redraw_figures.py --data ../data/reproduced --output redrawn
+python scripts/summarize_validation.py --data ../data/validation
 ```
 
-Alternatively, run `tectonic manuscript.tex`.
+The source README and user guide give commands for repeating the integrations, high-precision comparisons and notebook examples. Use fresh output directories. The requirements files specify the reproduction environment; the reported calculations used Python 3.13.9. [Execution notes](Computational_materials/EXECUTION_NOTES.txt) state the installation and notebook qualifications for the machine used to validate this version.
 
-## Reproduce the calculations
+The reported assessment includes 2,228 completed mode evaluations, 21 automated tests and 299 high-precision analytic comparisons. All satisfy the stated criteria. Accuracy beyond the tested cases requires independent convergence checks; norm conservation or agreement between formulations alone is insufficient.
 
-Extract `Supplementary_code.zip` and follow `Computational_materials/README.md`. It contains the Dirac and quantum-kinetic solvers, analytic Sauter benchmark, tests, reproduction and validation scripts, notebook, execution notes and manuscript files. The scripts generate the numerical datasets and diagnostics.
-
-`PairPulse_source.zip` contains the same materials.
-
-The model treats a prescribed, spatially homogeneous electric field in one spatial dimension. The manuscript specifies the numerical conventions, validation criteria and physical limitations. The source code is distributed under the MIT license included in the archive.
+The repository includes checksum manifests for integrity checks. The two supplementary workflow diagrams are retained as supporting software illustrations; the article contains Figures 1–4.

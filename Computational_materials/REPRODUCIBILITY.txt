@@ -1,0 +1,12 @@
+PairPulse 0.2.2 reproduction
+
+Install the source with requirements-validation.txt in an isolated environment.
+Run the tests and calculation commands in README.md, using fresh output directories.
+The selected notebook kernel must contain PairPulse and the required libraries.
+The validation scripts check completeness, physical bounds and numerical criteria.
+Installation and execution qualifications are recorded in EXECUTION_NOTES.txt.
+
+Built-in pulses limit integration steps to duration/8. Custom profiles should
+provide resolution_scale() or an explicit max_step. Use sauter_log_occupation
+for underflowed spectra. Convergence studies are empirical accuracy checks,
+not certified bounds for arbitrary parameters.

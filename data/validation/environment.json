@@ -1,0 +1,29 @@
+{
+  "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:09:58) [MSC v.1929 64 bit (AMD64)]",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "processor": "Intel64 Family 6 Model 60 Stepping 3, GenuineIntel",
+  "cpu_count": 8,
+  "workers": 6,
+  "command": [
+    "work\\release\\PairPulse_CPC_package_v0.2.2\\software\\Computational_materials\\scripts\\validate_study.py",
+    "--output",
+    "work\\release\\PairPulse_CPC_package_v0.2.2\\evidence\\validation_rerun",
+    "--workers",
+    "6"
+  ],
+  "packages": {
+    "pairpulse": "0.2.2",
+    "numpy": "2.3.5",
+    "scipy": "1.16.3",
+    "matplotlib": "3.10.6",
+    "qutip": "5.2.2",
+    "nbclient": "0.10.2",
+    "ipykernel": "6.31.0"
+  },
+  "script_sha256": "d84fe5411727a961491815bd1f7079ef7d6c5fd56bab174537f490dad6b588fa",
+  "started_at_utc": "2026-11-04T20:46:55.954586+00:00",
+  "planned_jobs": 2228,
+  "elapsed_seconds": 793.5796254000161,
+  "completed_jobs": 2228,
+  "failures": 0
+}

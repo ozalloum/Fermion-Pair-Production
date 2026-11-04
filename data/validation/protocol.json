@@ -1,0 +1,108 @@
+{
+  "version": 2,
+  "occupation_absolute_tolerance": 1e-10,
+  "resolved_occupation_floor": 1e-10,
+  "resolved_relative_tolerance": 1e-05,
+  "yield_relative_tolerance": 0.0001,
+  "diagnostic_tolerance": 1e-08,
+  "feature_step_fraction": 0.125,
+  "interpretation": "Empirical checks, not certified error bounds. Refined numerical runs are not exact.",
+  "integration": {
+    "tail": 20,
+    "rtol": [
+      2e-08,
+      2e-10,
+      2e-12
+    ],
+    "atol_over_rtol": 0.01,
+    "step_coefficients": [
+      0.18,
+      0.09,
+      0.045
+    ],
+    "momenta": [
+      -1.5,
+      -0.75,
+      0,
+      0.75,
+      1.5
+    ]
+  },
+  "window": {
+    "tails": [
+      12,
+      16,
+      20
+    ],
+    "rtol": 2e-12,
+    "coefficient": 0.045
+  },
+  "parameters": {
+    "amplitudes": [
+      0.1,
+      0.3,
+      0.8
+    ],
+    "durations": [
+      0.5,
+      2,
+      5
+    ],
+    "momenta": "13 equally spaced in +/- max(1.5,E0*tau+2/tau)",
+    "tail": 20,
+    "rtol": 2e-12,
+    "coefficient": 0.09
+  },
+  "quadrature": {
+    "single_bounds": [
+      1.5,
+      3,
+      4.5
+    ],
+    "double_bounds": [
+      1.8,
+      3.6,
+      5.4
+    ],
+    "fixed_domain_counts": [
+      41,
+      81,
+      161
+    ],
+    "extended_counts": [
+      321,
+      481
+    ],
+    "tail": 20,
+    "rtol": 2e-12,
+    "coefficient": 0.09
+  },
+  "qutip": {
+    "method": "vern9",
+    "normalize_output": false,
+    "tail": 20,
+    "rtol": 2e-12,
+    "coefficient": 0.09,
+    "modes_per_case": 41
+  },
+  "custom_pulse": {
+    "E": "0.3 exp(-(t/2)^2)",
+    "A": "-0.3 sqrt(pi) erf(t/2)",
+    "momenta": [
+      -1.5,
+      -0.75,
+      0,
+      0.75,
+      1.5
+    ],
+    "tails": [
+      6,
+      8
+    ],
+    "coefficients": [
+      0.09,
+      0.045
+    ]
+  },
+  "declared_at_utc": "2026-11-04T20:46:55.786852+00:00"
+}

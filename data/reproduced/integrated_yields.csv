@@ -1,0 +1,6 @@
+case,density_per_length
+single_sauter_dirac,0.00011395114844633236
+single_sauter_qke,0.00011395114844597144
+single_sauter_exact,0.00011395114844448187
+double_sauter_dirac,0.001691988147380917
+double_sauter_qke,0.0016919881473907211

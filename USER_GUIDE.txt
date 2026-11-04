@@ -1,0 +1,47 @@
+PairPulse 0.2.2 user guide
+
+SCOPE AND CONVENTIONS
+The package implements two-component Dirac and three-variable quantum-kinetic evolution in one spatial dimension for a prescribed homogeneous fixed-axis field. Natural units are used; pi=p-q*A and E=-dA/dt. Occupations are per channel. Density uses dp/(2*pi), with no transverse integral or extra spin factor. No back-reaction, collisions, arbitrary polarization or opposite-polarity built-in pulse train is supplied. Custom consistent fields may have either polarity. Finite-time occupations use the stated instantaneous basis.
+
+INSTALLATION AND REPRODUCTION
+Create/activate a virtual environment and run the following commands from Computational_materials. Requirements files are exact pins, not lower bounds; the core metadata separately declares lower bounds. The pinned environment requires Python >=3.11, while the core declares >=3.10. Only Python 3.13.9 was tested for this revision.
+
+python -m pip install -r requirements-validation.txt .
+python -m unittest discover -s tests -v
+python scripts/reproduce.py --output regenerated --points 41
+python scripts/make_reproducibility_figures.py --output regenerated --points 41
+python scripts/redraw_figures.py --data regenerated --output redrawn
+python scripts/validate_study.py --output validation --workers 6
+python scripts/summarize_validation.py --data validation
+python scripts/check_analytic_precision.py --output analytic-check
+python scripts/check_derivations.py --output derivation-check
+python scripts/execute_notebook.py --output notebook-output
+python scripts/verify_checksums.py
+
+NUMERICAL CONTROLS
+The default DOP853 tolerances are rtol=2e-10 and atol=2e-12. The phase step cap is max_step_coefficient/max_frequency (default coefficient 0.18). The sampled frequency estimate is not a mathematical upper bound. Built-in Sauter profiles additionally cap steps at duration/8; pulse trains use the shortest active duration. A positive finite max_step can impose a stricter absolute cap. Custom pulses implement field(t), potential(t), time_window(tail_factor), and preferably resolution_scale(). Without a feature scale or explicit cap the solver warns: a narrow feature can be missed while a norm or invariant remains excellent. Time windows must be finite and increasing.
+
+The stable Sauter expression uses rationalized energy gaps, logarithmic scaling and expm1 factors. sauter_log_occupation returns -infinity for zero field and retains finite logs for underflowed probabilities. sauter_exact_occupation returns the floating-point probability. Inputs whose kinematics cannot be represented raise an error; this is not an arbitrary-precision solver.
+
+integrated_density sorts finite nodes and rejects duplicates. With check_bounds=True it also enforces occupations within [0,1], allowing bounds_tolerance=1e-10 by default. Small tolerated negative values are not clipped. Increase the momentum range separately from refining spacing. Tolerances, caps and endpoints also need independent refinement. The double-pulse validation uses two pulses with E0=0.3, tau=1.1 and centers -3.5,+3.5; pulse_spec records each component exactly.
+
+EVIDENCE AND LIMITS
+All 2,228 v2 validation evaluations completed without failures and all acceptance checks passed. Twenty-one unit/regression tests passed. The 299-mode 100-digit analytic comparison passed. Figures and numerical tables were regenerated. The maximum reference-spectrum absolute error is 7.543403835602591e-13. These are measured results for the specified grids, not general error bounds or claims of accurate machine-precision digits.
+
+Installation and notebook execution qualifications are described in Computational_materials/EXECUTION_NOTES.txt. Detailed execution records are retained in the complete author package.
+
+PACKAGE MAP
+manuscript.pdf and manuscript.tex contain the article and its LaTeX source.
+Computational_materials/ contains the Python package, tests, scripts and notebook.
+data/ contains the numerical records used in the figures and validation tables.
+PairPulse_source.zip contains the source and user guide.
+Supplementary_code.zip contains the source, user guide and supporting data.
+CHECKSUMS.sha256 records file checksums for integrity verification.
+
+To redraw the supplied figures, run from Computational_materials:
+python scripts/redraw_figures.py --data ../data/reproduced --output redrawn
+To recompute the supplied validation summaries:
+python scripts/summarize_validation.py --data ../data/validation
+
+To compile the manuscript, run pdflatex manuscript.tex twice from the repository
+root using a LaTeX distribution with the packages named in its preamble.

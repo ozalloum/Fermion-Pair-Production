@@ -1,0 +1,19 @@
+{
+  "python": "3.13.9",
+  "numpy": "2.3.5",
+  "scipy": "1.16.3",
+  "matplotlib": "3.10.6",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "points_per_spectrum": 41,
+  "elapsed_seconds": 71.28936410002643,
+  "max_absolute_error_dirac_exact": 7.482620209206536e-13,
+  "max_absolute_error_qke_exact": 7.543403835602591e-13,
+  "max_relative_error_dirac_exact_resolved_modes": 1.6839802678177787e-08,
+  "max_relative_error_qke_exact_resolved_modes": 1.683214267829399e-08,
+  "max_qke_invariant_error_single": 9.128253708468037e-13,
+  "max_dirac_norm_error_single": 6.293854326600012e-13,
+  "max_qke_invariant_error_double": 6.9604322305849564e-12,
+  "max_dirac_norm_error_double": 4.769518113789672e-13,
+  "sum_nfev_single_spectrum": 452900,
+  "sum_nfev_double_spectrum": 349628
+}

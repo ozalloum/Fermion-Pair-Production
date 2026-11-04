@@ -1,85 +1,228 @@
-% Fermion pair production: cross-validation and numerical error analysis.
 \documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
 \usepackage[margin=25mm]{geometry}
-\usepackage[numbers]{natbib}
-\usepackage{amsmath,amssymb,bm}
-\usepackage{graphicx,booktabs}
-\usepackage{xurl}
-\usepackage{placeins}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{amsmath,amssymb,bm,booktabs,graphicx,xurl,placeins,xcolor}
 \usepackage[colorlinks=true,allcolors=blue]{hyperref}
-\setlength{\emergencystretch}{1em}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\lstset{basicstyle=\small\ttfamily,breaklines=true,columns=fullflexible,keepspaces=true,frame=single,rulecolor=\color{gray}}
+\setlength{\emergencystretch}{2em}
+\setlength{\parskip}{3pt}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.9}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.85}
 \newcommand{\sech}{\operatorname{sech}}
-\hypersetup{pdftitle={Fermion pair production in pulsed electric fields: cross-validation of Dirac and quantum-kinetic calculations},pdfauthor={Othman H. Y. Zalloum},pdfsubject={Fermion pair production in pulsed electric fields},pdfkeywords={fermion pair production, pulsed electric fields, Dirac equation, quantum kinetic theory, numerical convergence}}
-\title{Fermion pair production in pulsed electric fields: cross-validation of Dirac and quantum-kinetic calculations}
-\author{Othman H. Y. Zalloum\\[3pt]
+\newcommand{\PairPulse}{\textsc{PairPulse}}
+\newcommand{\ack}[1]{\section*{Acknowledgments}#1}
+\newcommand{\funding}[1]{\section*{Funding}#1}
+\newcommand{\roles}[1]{\section*{CRediT authorship contribution statement}#1}
+\newcommand{\data}[1]{\section*{Data and code availability}#1}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small PairPulse}\fancyhead[R]{\small O. H. Y. Zalloum}
+\fancyfoot[C]{\thepage}\setlength{\headheight}{14pt}
+\title{PairPulse: Cross-validation and convergence diagnostics for fermion pair production}
+\author{Othman H. Y. Zalloum\thanks{Corresponding author: \href{mailto:ozalloum@ppu.edu}{ozalloum@ppu.edu}. ORCID: \href{https://orcid.org/0000-0001-7282-1332}{0000-0001-7282-1332}.}\\[5pt]
 \small Department of Applied Mathematics and Physics\\
-\small Palestine Polytechnic University, Hebron, Palestine\\[3pt]
-\small Correspondence: \href{mailto:ozalloum@ppu.edu}{ozalloum@ppu.edu}\\
-\small ORCID: \href{https://orcid.org/0000-0001-7282-1332}{0000-0001-7282-1332}}
+\small Palestine Polytechnic University, Hebron, West Bank, Palestine}
 \date{}
+\hypersetup{pdftitle={PairPulse: Cross-validation and convergence diagnostics for fermion pair production},pdfauthor={Othman H. Y. Zalloum}}
 \begin{document}
 \maketitle
+\begin{center}\small Prepared for \textit{Computer Physics Communications}: Computer Programs in Physics (CPiP)\end{center}
 \begin{abstract}
-Reliable fermion pair-production spectra in pulsed electric fields require control of time integration, finite pulse windows and momentum discretization. We compare direct Dirac-mode evolution with the equivalent quantum-kinetic equations for prescribed, spatially homogeneous fields in one spatial dimension. Both formulations use a common instantaneous-vacuum convention and are tested against the exact asymptotic Sauter spectrum. For the reference pulse, their maximum absolute occupation errors on 41 momentum modes are below $8\times10^{-13}$; increasing the integration half-width from six to twelve pulse durations reduces the zero-momentum discrepancy by more than five orders of magnitude. A separated two-pulse field gives agreement between formulations within $1.18\times10^{-13}$. An additional set of 1,962 mode evaluations tests integration controls, endpoints, pulse parameters, a Gaussian profile and momentum-integrated densities. Across nine Sauter parameter pairs, the maximum absolute occupation error at refined settings is $4.58\times10^{-15}$. Grid and domain refinements satisfy a prescribed $10^{-4}$ relative density criterion. These results distinguish agreement between state representations from convergence to asymptotic observables: small conservation errors and agreement between solvers do not alone control finite-window or momentum-domain bias. The accompanying implementation makes the equations, numerical conventions and validation procedure reproducible for the tested homogeneous-field models.
+\PairPulse{} is a Python package for calculating fermion pair-production spectra and one-dimensional densities in prescribed, homogeneous, fixed-axis electric fields. It implements two-component Dirac evolution and the equivalent three-variable quantum-kinetic equations, an exact Sauter benchmark, and a reproducible separation of integration, temporal-endpoint, momentum-spacing and momentum-domain sensitivity. The reference spectrum has maximum absolute occupation error below $8\times10^{-13}$ at the specified controls. All 2,228 validation evaluations complete without failures and satisfy the stated criteria for occupation accuracy, conservation, and convergence. A short-window example gives a Dirac--kinetic difference of $6.29\times10^{-15}$ while retaining an asymptotic error of $1.18\times10^{-7}$. A double-pulse density changes by $3.89\times10^{-4}$ on domain enlargement after a spacing refinement changes it by only $1.44\times10^{-6}$. A separate QuTiP integrator, 100-digit checks of the stabilized analytic expression, software tests and results for individual momentum modes support the reported cases. The contribution is a documented implementation and systematic assessment of numerical error for established equations, not a parameter-independent accuracy guarantee.
 \end{abstract}
 
-\noindent\textbf{Keywords:} fermion pair production, pulsed electric fields, Dirac equation, quantum kinetic theory, numerical convergence.
+\section*{Program Summary}
+\noindent\textbf{Program title:} PairPulse, version 0.2.2.\\
+\textbf{Developer's repository link:} \url{https://github.com/ozalloum/Fermion-Pair-Production}.\\
+\textbf{Licensing provisions:} MIT.\\
+\textbf{Programming language:} Python 3.10 or later for the core; Python 3.11 or later for the specified reproduction environment.\\
+\textbf{External libraries:} NumPy and SciPy; Matplotlib for plots; QuTiP for the separate integration check; Jupyter components for notebook execution; mpmath for high-precision analytic checks.\\
+\textbf{Supplementary material:} Source code, user guide, numerical data, calculation parameters, software tests, demonstration notebook, and reproduction scripts.
+
+\noindent\textbf{Nature of problem:} Fermion production in a time-dependent homogeneous electric field can be calculated from several equivalent state representations. Numerical agreement between them does not ensure that finite initialization and observation times approximate an asymptotic spectrum, or that a finite momentum interval captures the integrated density. The program computes occupations and one-dimensional densities while providing separate checks on state evolution, temporal endpoints, quadrature spacing and momentum-domain truncation.
+
+\noindent\textbf{Solution method:} Each canonical-momentum mode is evolved using either a two-component Dirac equation or three real quantum-kinetic equations with a common instantaneous-vacuum convention. SciPy's DOP853 integrator uses explicit tolerance and step-cap controls. An analytic Sauter expression, norm and kinetic-invariant diagnostics, parameter and endpoint sweeps, and nested momentum grids test the calculation. A separate QuTiP \texttt{vern9} integration checks dependence on the implementation. Individual records and summary scripts make these comparisons reproducible.
+
+\noindent\textbf{Restrictions and unusual features:} The model is one-dimensional, spatially homogeneous, fixed-axis, collisionless and without back-reaction. The supplied Sauter pulses have nonnegative amplitudes; the built-in train therefore contains same-polarity pulses. Custom profiles must provide mutually consistent $E(t)$, $A(t)$ and endpoints, and a declared feature scale or explicit maximum step for resolution. No transverse-momentum integral or additional spin factor is included. Refinement differences are empirical diagnostics, not certified error estimates. Arbitrary polarization requires different equations. The optional QuTiP check is limited to the validation cases.
+
+\noindent\textbf{Running time:} The 2,228-evaluation validation took approximately 794~s using six parallel processes; the 41-point spectrum calculation took approximately 71~s. These are representative wall-clock times on the reported computing environment, rather than controlled performance benchmarks.
+
+\noindent\textbf{Keywords:} fermion pair production; Dirac equation; quantum kinetic theory; numerical validation; truncation error; scientific software.
 
 \section{Introduction}
 
-Pair creation by an electric field connects the vacuum structure of quantum electrodynamics with nonequilibrium particle dynamics. Foundational treatments established vacuum polarization, transmission between Dirac states and pair production in constant or alternating backgrounds \cite{EulerHeisenberg1936,Sauter1931,Schwinger1951,BrezinItzykson1970}. Subsequent mean-field and kinetic approaches described the evolution of particle occupations, including Pauli blocking and memory effects \cite{Kluger1991,Kluger1992,Kluger1998,Schmidt1998,Schmidt1999}.
+Pair creation by a prescribed electric field connects vacuum instability in quantum electrodynamics with nonequilibrium particle dynamics. Foundational treatments established transmission between Dirac states, vacuum polarization and pair production in constant or alternating backgrounds \cite{EulerHeisenberg1936,Sauter1931,Schwinger1951,BrezinItzykson1970}. Mean-field and kinetic descriptions subsequently incorporated occupation dynamics, Pauli blocking and memory effects \cite{Kluger1991,Kluger1992,Kluger1998,Schmidt1998,Schmidt1999}. Recent reviews place these models within the wider development of strong-field QED and discuss their relation to semiclassical and phase-space methods \cite{Fedotov2023,Schubert2024}. Here we study a homogeneous external-field model; we do not infer an experimental yield from its one-dimensional density.
 
-For a time-dependent field, the final momentum spectrum depends on the pulse history. The temporal Sauter pulse provides an exact reference for testing numerical descriptions, while kinetic, scattering and Wigner formulations offer complementary representations of the same production process \cite{Dumlu2009,Hebenstreit2010,Fedotov2011,Huet2014}. Short pulses, subcycle structure and superposed time scales can modify the spectrum substantially \cite{Hebenstreit2008,Schutzhold2008,Hebenstreit2009}. Interference in temporally structured backgrounds has also been studied using semiclassical and other approaches \cite{DumluDunne2010,DumluDunne2011a,DumluDunne2011b,Akkermans2012,Li2014}. Resolving such spectra numerically requires a specified momentum convention, a consistent definition of the initial vacuum and final occupation, and convergence checks on the quantities of physical interest.
+The relations among the main calculational approaches are established results. Dumlu connected quantum-kinetic and scattering descriptions \cite{Dumlu2009}; Hebenstreit, Alkofer and Gies related the homogeneous limit of the Wigner formalism to quantum kinetic theory and supplied exact Sauter-pulse benchmarks \cite{Hebenstreit2010}. Further developments include kinetic and Vlasov formulations \cite{Fedotov2011,KimSchubert2011,Huet2014}. Wang, Fu and Liu already compared quantum-kinetic and time-dependent Dirac calculations over a range of Keldysh parameters, and reduced the homogeneous Dirac problem to momentum-wise two-component propagation \cite{Wang2017}. Li, Gong and Li established computational-QFT/quantum-kinetic equivalence and verified it numerically before studying inhomogeneous two-colour fields \cite{LiGong2021}. More recently, Aleksandrov, Kudlis and Klochai derived the kinetic system for arbitrarily polarized uniform fields and its correspondence with the Dirac--Heisenberg--Wigner formalism \cite{Aleksandrov2024}. Majczak and co-workers developed an $S$-matrix treatment retaining spin-, helicity- and phase-resolved information \cite{Majczak2024}. Accordingly, agreement between Dirac and kinetic occupations is used here as an implementation check, not as a new equivalence result.
 
-The numerical question addressed here is how to distinguish agreement between two equivalent evolution equations from accuracy of the resulting asymptotic spectrum and integrated density. A calculation can preserve its norm or kinetic invariant while retaining a bias from finite initialization and measurement times. Two solvers can also agree on a finite momentum grid while omitting a contribution to the density outside that grid. These issues call for separate tests of state evolution, temporal endpoints and momentum integration.
+Pulse shape and temporal structure can strongly alter momentum spectra. Short pulses, subcycle structure and multiple time scales were studied in Refs.~\cite{Hebenstreit2008,Schutzhold2008,Hebenstreit2009}; interference in structured backgrounds was developed in Refs.~\cite{DumluDunne2010,DumluDunne2011a,DumluDunne2011b,Akkermans2012,Li2014}. Exact-WKB analysis relates pair numbers to complex turning-point connection matrices in a semiclassical limit \cite{Taya2021}. Recent work distinguishes physical switching of a background from dynamical assistance \cite{Aleksandrov2025}, while a 2026 preprint illustrates that carrier-free pulses can also display spectral fringes \cite{Aleksandrov2026}. These results motivate reliable numerical spectra, but they do not by themselves identify the origin of a particular shoulder or modulation in the examples below.
 
-We compare a two-component Dirac equation with the full auxiliary-variable quantum-kinetic system under identical prescribed fields. The single Sauter pulse supplies an external benchmark; a separated two-pulse field and a Gaussian profile test agreement beyond that benchmark. Tolerance and step-cap refinements are distinguished from pulse-window, momentum-spacing and momentum-domain refinements. The contribution is a reproducible numerical assessment of these established formulations, with explicit conventions and quantified errors for the reported cases. The accompanying code supplies the implementation and reproduction materials. Section~\ref{sec:model} defines the physical model, Section~\ref{sec:software} specifies the numerical protocol, and Section~\ref{sec:results} presents the comparisons. Section~\ref{sec:discussion} discusses their implications and limits. Detailed reproduction instructions accompany the computational materials.
+A second issue is the observable being approximated. Particle number at an intermediate time depends on the chosen reference basis, whereas the asymptotic in/out particle number has a well-defined late-time limit under the stated pulse assumptions \cite{Dabrowski2016}. This basis dependence does not make intermediate-time structure merely a numerical artifact: Ilderton relates adiabatic particle number to the asymptotic yield of a field switched off at the observation time \cite{Ilderton2022}. We fix the instantaneous energy basis and ask how closely a finite-endpoint calculation approximates its asymptotic limit. This question differs from testing whether two representations agree at the same finite endpoints. Similarly, a stable quadrature on a fixed momentum interval need not approximate the integral over the whole momentum line.
+
+\PairPulse{} provides a compact, MIT-licensed implementation of these established equations, with an interface separating pulse specification from mode evolution. Its intended use is as a documented reference calculation and software benchmark for homogeneous-field studies. The contribution is a reproducible numerical error assessment and the accompanying reusable implementation. We separate changes of integration controls, temporal endpoints, momentum spacing and momentum range, and provide results for individual momentum modes. For the reference Sauter pulse, increasing the half-window from six to twelve pulse durations reduces the zero-momentum asymptotic discrepancy by more than five orders of magnitude. For the separated-pulse density, enlarging the momentum interval changes the estimate by about $3.9\times10^{-4}$ after a fixed-domain spacing refinement has changed it by only about $1.4\times10^{-6}$. These quantitative examples demonstrate distinct failure modes of incomplete convergence checks. A separate QuTiP integration further tests dependence on the numerical implementation. Relative to the physics and formalism comparisons above, the software contribution is the packaged combination of explicit conventions, individual mode results, separate convergence studies and reproducible examples. We make no claim that the underlying physical problem was previously unsolved or that PairPulse replaces the more general methods in Refs.~\cite{LiGong2021,Aleksandrov2024,Majczak2024}. The study does not introduce a new pair-production mechanism, a new equivalence theorem or a parameter-independent accuracy guarantee.
+
+Section~\ref{sec:model} defines the model, conventions and relation between the evolved states. Section~\ref{sec:software} specifies the validation protocol, Section~\ref{sec:results} reports the numerical comparisons, and Section~\ref{sec:discussion} discusses their scope. Appendix~\ref{app:reproduction} describes how to reproduce the numerical results, and Appendix~\ref{app:sauterderivation} derives the Sauter benchmark and its stable numerical evaluation.
 
 \section{Physical model and observables}
 \label{sec:model}
 
-We consider a prescribed electric field in one spatial dimension, neglecting back-reaction and collisions. Spatial homogeneity allows each canonical momentum mode to evolve independently. Natural units, $\hbar=c=1$, and temporal gauge, $A^0=0$, are used throughout. With positive charge magnitude $q$, the kinetic momentum is
+We consider a prescribed electric field in one spatial dimension, neglecting back-reaction and collisions. Spatial homogeneity allows each canonical momentum mode to evolve independently. Natural units, $\hbar=c=1$, and temporal gauge, $A^0=0$, are used throughout. With positive charge magnitude $q$, the kinetic momentum follows the temporal-gauge convention of Ref.~\cite{Schmidt1998}, Eqs.~(2)--(3),
 \begin{equation}
   \pi_p(t)=p-qA(t), \qquad E(t)=-\dot A(t).
   \label{eq:kinetic}
 \end{equation}
-The reference field is the temporal Sauter pulse,
+The reference field is the temporal Sauter pulse \cite[Sec.~II.C.2]{Hebenstreit2010},
 \begin{align}
   E(t)&=E_0\sech^2\!\left(\frac{t-t_c}{\tau}\right),\nonumber\\
   A(t)&=-E_0\tau\tanh\!\left(\frac{t-t_c}{\tau}\right),
   \label{eq:sauter}
 \end{align}
-where $E_0\geq0$ and $\tau>0$. Separated pulses are constructed by summing both fields and potentials, preserving $E=-\dot A$. All numerical cases below set $m=q=1$; momenta, times and field strengths are consequently given in units of $m$, $m^{-1}$ and $m^2/q$, respectively. The spectra are plotted against canonical momentum in the specified gauge. The corresponding final kinetic momentum is $p-qA(t_f)$.
+where $E_0\geq0$ and $\tau>0$. Separated pulses are constructed by summing both fields and potentials, preserving $E=-\dot A$. All numerical cases below set $m=q=1$; momenta, times and field strengths are consequently given in units of $m$, $m^{-1}$ and $m^2/q$, respectively. The spectra are plotted against canonical momentum in the specified gauge. The corresponding final kinetic momentum is $p-qA(t_f)$. A constant gauge shift $A\mapsto A+C$ must be accompanied by $p\mapsto p+qC$ to preserve $\pi_p$. The full momentum integral is invariant under this relabelling; the endpoints of a truncated canonical-momentum interval must also be shifted if the same kinetic-momentum range is intended. The charge convention fixes a species label; it does not include an extra spin or particle--antiparticle degeneracy factor.
 
 \subsection{Dirac-mode evolution and particle occupation}
 
-For each momentum, the two-component spinor obeys
+Specializing the homogeneous-field Dirac equation to one spatial dimension \cite[Sec.~II.A and Appendix~A]{LiGong2021}, and choosing a two-component representation, gives
 \begin{equation}
-  H_p(t)=\pi_p(t)\sigma_1+m\sigma_3, \qquad
-  i\partial_t\psi_p(t)=H_p(t)\psi_p(t),
-  \label{eq:dirac}
+ i\partial_t\Psi(x,t)=\bigl[\alpha(-i\partial_x-qA(t))+\beta m\bigr]\Psi(x,t),
+ \qquad \alpha=\sigma_1,\quad\beta=\sigma_3.
+ \label{eq:diracposition}
 \end{equation}
-where $\sigma_i$ are Pauli matrices and $m>0$. Let $u_{p,\pm}(t)$ be normalized instantaneous eigenvectors with energies $\pm\omega_p(t)$, where $\omega_p(t)=\sqrt{m^2+\pi_p(t)^2}$. The finite-time initial vacuum is specified by $\psi_p(t_i)=u_{p,-}(t_i)$, and the occupation at $t_f$ is
+These matrices obey $\alpha^2=\beta^2=1$ and $\{\alpha,\beta\}=0$. Expand the field mode as $\Psi(x,t)=\int dp\,e^{ipx}\psi_p(t)/\sqrt{2\pi}$. Since $A$ has no spatial dependence, $-i\partial_x$ acts as multiplication by $p$ and distinct canonical momenta do not mix. Equation~\eqref{eq:diracposition} therefore reduces to
 \begin{equation}
-  f_p^{\mathrm D}(t_f)=\left|u_{p,+}^{\dagger}(t_f)\psi_p(t_f)\right|^2.
-  \label{eq:occupation}
+ H_p(t)=\pi_p(t)\sigma_1+m\sigma_3=
+ \begin{pmatrix}m&\pi_p\\\pi_p&-m\end{pmatrix},\qquad
+ i\partial_t\psi_p=H_p\psi_p.
+ \label{eq:dirac}
 \end{equation}
-As the endpoints recede into the pulse tails, this projection approaches the asymptotic in/out definition. Exact evolution preserves $\psi_p^\dagger\psi_p=1$; its numerical deviation is monitored independently of the occupation.
+The anticommutation of the Pauli matrices gives $H_p^2=(m^2+\pi_p^2)1$, so the instantaneous energies are $\pm\omega_p$, with $\omega_p=\sqrt{m^2+\pi_p^2}$. Define $\theta_p=\operatorname{atan2}(\pi_p,m)$; for $m>0$, this is continuous in $\pi_p$ and satisfies $\sin\theta_p=\pi_p/\omega_p$ and $\cos\theta_p=m/\omega_p$. A real orthonormal choice of eigenvectors is
+\begin{equation}
+ u_{p,+}=\begin{pmatrix}\cos(\theta_p/2)\\\sin(\theta_p/2)\end{pmatrix},\qquad
+ u_{p,-}=\begin{pmatrix}-\sin(\theta_p/2)\\\cos(\theta_p/2)\end{pmatrix}.
+ \label{eq:eigenvectors}
+\end{equation}
+Direct multiplication verifies $H_pu_{p,\pm}=\pm\omega_pu_{p,\pm}$, $u_{p,\pm}^\dagger u_{p,\pm}=1$ and $u_{p,+}^\dagger u_{p,-}=0$. An arbitrary phase on either eigenvector does not change the projected occupation.
+
+The occupation is obtained by projection onto instantaneous energy eigenstates, as in Ref.~\cite{LiGong2021}, Eqs.~(13)--(14), with the spin sum omitted for the single channel considered here. To represent the specified finite-time vacuum, evolve the initially occupied negative-energy mode, $\psi_p(t_i)=u_{p,-}(t_i)$. At $t_f$ expand it as $\psi_p=c_+u_{p,+}+c_-u_{p,-}$. Orthonormality gives $c_+=u_{p,+}^\dagger\psi_p$, and hence
+\begin{equation}
+ f_p^{\mathrm D}(t_f)=|c_+(t_f)|^2
+ =\left|u_{p,+}^\dagger(t_f)\psi_p(t_f)\right|^2.
+ \label{eq:occupation}
+\end{equation}
+For the vacuum initial state this transition probability is the produced occupation in the selected fermionic channel; the paired antiparticle is not an additional multiplicative factor in $f_p$. Hermiticity yields
+\begin{equation}
+ \frac{d}{dt}(\psi_p^\dagger\psi_p)
+ =i\psi_p^\dagger H_p\psi_p-i\psi_p^\dagger H_p\psi_p=0.
+\end{equation}
+Thus $|c_+|^2+|c_-|^2=1$ and $0\leq f_p\leq1$ for exact evolution. The numerical solver neither renormalizes the final state nor clips its occupation; norm drift remains a diagnostic.
+
+Equation~\eqref{eq:occupation} specifies an instantaneous-basis occupation at finite time. It is not a basis-independent particle number while the field acts \cite{Dabrowski2016}. As initialization and observation times recede into the field-free tails, it approaches the in/out occupation. This distinction is why small norm drift cannot by itself establish asymptotic accuracy.
+
+\subsection{Vacuum interpretation and fermionic statistics}
+The spinor transition in Eq.~\eqref{eq:occupation} has a field-theoretic interpretation. At asymptotically field-free times, expand the quantized Dirac field in normalized positive- and negative-energy modes. Evolution mixes the incoming particle annihilation operator $b_{\mathrm{in}}$ with the paired antiparticle creation operator $d_{\mathrm{in}}^\dagger$. Suppressing the paired momentum labels and choosing consistent phases, the fermionic Bogoliubov transformation \cite[Eqs.~(10)--(11)]{Schmidt1998} can be written
+\begin{equation}
+ \begin{pmatrix}b_{\mathrm{out}}\\d_{\mathrm{out}}^\dagger\end{pmatrix}
+ =\begin{pmatrix}\alpha&\beta\\-\beta^*&\alpha^*\end{pmatrix}
+ \begin{pmatrix}b_{\mathrm{in}}\\d_{\mathrm{in}}^\dagger\end{pmatrix},
+ \qquad |\alpha|^2+|\beta|^2=1.
+ \label{eq:bogoliubov}
+\end{equation}
+Here $\alpha,\beta$ are mode amplitudes, not the Dirac matrices in Eq.~\eqref{eq:diracposition}. The plus sign in the normalization follows from preserving fermionic anticommutators. In the incoming vacuum, $b_{\mathrm{in}}|0_{\mathrm{in}}\rangle=d_{\mathrm{in}}|0_{\mathrm{in}}\rangle=0$, and therefore
+\begin{equation}
+ \langle0_{\mathrm{in}}|b_{\mathrm{out}}^\dagger b_{\mathrm{out}}|0_{\mathrm{in}}\rangle
+ =|\beta|^2\langle0_{\mathrm{in}}|d_{\mathrm{in}}d_{\mathrm{in}}^\dagger|0_{\mathrm{in}}\rangle
+ =|\beta|^2.
+\end{equation}
+The same calculation gives the paired antiparticle occupation $|\beta|^2$. The amplitude obtained by evolving an incoming negative-energy mode and projecting onto the outgoing positive-energy mode is $\beta$ up to a phase convention. Thus Eq.~\eqref{eq:occupation} computes the vacuum pair occupation and automatically obeys Pauli exclusion. Summing the particle and antiparticle counts would give $2|\beta|^2$, but would count individual excitations rather than pairs. This manuscript consistently reports one channel and the corresponding pair density. At finite endpoints, the same construction uses the specified instantaneous vacuum and must be distinguished from an asymptotic scattering result.
 
 \subsection{Quantum-kinetic evolution}
 
-The quantum-kinetic equations (QKE) evolve an occupation $f_p^{\mathrm K}$ and two auxiliary functions $u_p,v_p$. With $W_p(t)=qE(t)m/\omega_p(t)^2$, they read
+The quantum-kinetic equations (QKE) evolve an occupation $f_p^{\mathrm K}$ and two auxiliary functions $u_p,v_p$. With $W_p(t)=qE(t)m/\omega_p(t)^2$, they read \cite[Eqs.~(48)--(50)]{Hebenstreit2010}
 \begin{align}
   \dot f_p^{\mathrm K} &= \frac{1}{2}W_p u_p, \nonumber\\
   \dot u_p &= W_p(1-2f_p^{\mathrm K})-2\omega_p v_p, \label{eq:qke}\\
   \dot v_p &= 2\omega_p u_p. \nonumber
 \end{align}
-The initial state $(f_p^{\mathrm K},u_p,v_p)=(0,0,0)$ at $t_i$ represents the same instantaneous vacuum as the Dirac initialization. Although local in these three variables, the system represents the non-Markovian kinetic evolution \cite{Schmidt1998,Dumlu2009}. It preserves the Bloch-vector invariant
+The spin-summed distribution $\widetilde f$ in that reference is related to the present occupation by $\widetilde f=2f_p^{\mathrm K}$; its auxiliary variables $\widetilde\chi_2,\widetilde\chi_3$ correspond to $u_p,v_p$, and its transverse energy reduces to $m$. The initial state $(f_p^{\mathrm K},u_p,v_p)=(0,0,0)$ at $t_i$ represents the same instantaneous vacuum as the Dirac initialization. Although local in these three variables, the system represents the non-Markovian kinetic evolution \cite{Schmidt1998,Dumlu2009,LiGong2021}. It preserves the Bloch-vector invariant
 \begin{equation}
   I_p=(1-2f_p^{\mathrm K})^2+u_p^2+v_p^2=1.
   \label{eq:invariant}
 \end{equation}
 The finite-time occupations from Eqs.~\eqref{eq:occupation} and \eqref{eq:qke} are compared at matching endpoints. Their common asymptotic limit is the quantity tested against the exact result below. Superscripts are omitted where a statement applies to either formulation.
+
+\subsection{Explicit relation between the state representations}
+\label{sec:mapping}
+
+The equivalence of the homogeneous Dirac and kinetic descriptions is established in Ref.~\cite[Sec.~II.A]{LiGong2021}. Here we derive every sign and factor in Eq.~\eqref{eq:qke} directly from the two-component Hamiltonian, using a rotating Bloch basis. In this subsection the momentum index is suppressed. The kinetic auxiliary scalar $u$ is distinct from the spinor eigenvectors $u_{p,\pm}$.
+
+For a normalized pure spinor, introduce its density matrix and Bloch vector,
+\begin{equation}
+ \rho=\psi\psi^\dagger=\tfrac12(1+\bm{s}\cdot\bm{\sigma}),\qquad
+ s_i=\psi^\dagger\sigma_i\psi.
+ \label{eq:blochdensity}
+\end{equation}
+Purity, $\rho^2=\rho$, implies $|\bm{s}|=1$. Write $H=\omega\bm{n}\cdot\bm{\sigma}$ and choose the orthonormal moving frame
+\begin{equation}
+ \bm{n}=(\sin\theta,0,\cos\theta),\quad
+ \bm{e}_{\theta}=(\cos\theta,0,-\sin\theta),\quad
+ \bm{e}_y=(0,1,0).
+\end{equation}
+The von Neumann equation $\dot\rho=-i[H,\rho]$, together with
+$[\bm{a}\cdot\bm{\sigma},\bm{b}\cdot\bm{\sigma}]=2i(\bm{a}\times\bm{b})\cdot\bm{\sigma}$, gives
+\begin{equation}
+ \dot{\bm{s}}=2\omega\bm{n}\times\bm{s}.
+ \label{eq:blochprecession}
+\end{equation}
+The factor two is the energy splitting $+\omega-(-\omega)$, not a degeneracy factor. Because $\dot\pi=-q\dot A=qE$ and $m$ is constant,
+\begin{equation}
+ \dot\theta=\frac{m\dot\pi}{m^2+\pi^2}
+ =\frac{qEm}{\omega^2}=W,\qquad
+ \dot{\bm{n}}=W\bm{e}_{\theta},\quad
+ \dot{\bm{e}}_{\theta}=-W\bm{n},\quad \dot{\bm{e}}_y=0.
+ \label{eq:movingframe}
+\end{equation}
+The positive-energy projector is $P_+=u_+u_+^\dagger=(1+\bm{n}\cdot\bm{\sigma})/2$. Therefore $f=\operatorname{tr}(\rho P_+)=(1+\bm{n}\cdot\bm{s})/2$. Define the remaining components by
+\begin{equation}
+ f=\frac{1+\bm{n}\cdot\bm{s}}2,\quad
+ u=\bm{e}_{\theta}\cdot\bm{s},\quad v=\bm{e}_y\cdot\bm{s},\qquad
+ \bm{s}=(2f-1)\bm{n}+u\bm{e}_{\theta}+v\bm{e}_y.
+ \label{eq:mapping}
+\end{equation}
+The orientation identities $\bm{n}\times\bm{e}_{\theta}=\bm{e}_y$ and $\bm{n}\times\bm{e}_y=-\bm{e}_{\theta}$ give $\dot{\bm{s}}=2\omega(u\bm{e}_y-v\bm{e}_{\theta})$. Applying the product rule to each component now yields
+\begin{align}
+ 2\dot f&=\dot{\bm{n}}\cdot\bm{s}+\bm{n}\cdot\dot{\bm{s}}=Wu+0,\nonumber\\
+ \dot u&=\dot{\bm{e}}_{\theta}\cdot\bm{s}+\bm{e}_{\theta}\cdot\dot{\bm{s}}
+       =-W(2f-1)-2\omega v,\label{eq:qkederived}\\
+ \dot v&=\bm{e}_y\cdot\dot{\bm{s}}=2\omega u.\nonumber
+\end{align}
+These are precisely Eq.~\eqref{eq:qke}. The initial negative-energy projector has $\bm{s}(t_i)=-\bm{n}(t_i)$, so $(f,u,v)(t_i)=(0,0,0)$. No slowly varying field assumption was made: the rotating basis is an exact change of variables in this model.
+
+The invariant follows either from orthonormality of the frame, $I=(2f-1)^2+u^2+v^2=|\bm{s}|^2$, or by explicit differentiation:
+\begin{align}
+ \dot I&=-4(1-2f)\dot f+2u\dot u+2v\dot v\nonumber\\
+ &=-2W(1-2f)u+2u[W(1-2f)-2\omega v]+4\omega uv=0.
+ \label{eq:invariantproof}
+\end{align}
+With $I(t_i)=1$, one obtains $(1-2f)^2\leq1$ and hence the fermionic bound $0\leq f\leq1$. Norm preservation and the kinetic invariant consequently express the same pure-state geometry in different coordinates. They are useful integration diagnostics but are not independent proofs of endpoint convergence.
+
+To make the memory implicit in the local three-variable system explicit, set $z=u+iv$. Then $\dot z-2i\omega z=W(1-2f)$ and $z(t_i)=0$. Multiplication by the integrating factor $\exp[-2i\int_{t_i}^{t}\omega(s)ds]$ and integration give
+\begin{equation}
+ z(t)=\int_{t_i}^{t}dt'\,W(t')[1-2f(t')]
+       \exp\!\left[2i\int_{t'}^t\omega(s)ds\right].
+\end{equation}
+Taking the real part and substituting $\dot f=Wu/2$ recovers the nonlocal kinetic equation of Ref.~\cite{Schmidt1998}, Eq.~(33), with $\varepsilon_\perp=m$ and the initial time replaced by $t_i$,
+\begin{equation}
+ \dot f(t)=\frac{W(t)}2\int_{t_i}^{t}dt'\,W(t')[1-2f(t')]
+ \cos\!\left[2\int_{t'}^t\omega(s)ds\right].
+ \label{eq:memory}
+\end{equation}
+The factor $1-2f$ is the fermionic statistical factor for this vacuum-channel convention. This derivation explains the relation to the established kinetic and scattering formulations \cite{Schmidt1998,Dumlu2009,Hebenstreit2010,LiGong2021} without treating that equivalence as a new result.
+
+The three real kinetic variables apply to the fixed-axis model used here. Arbitrarily rotating electric fields require a more general kinetic system \cite{Aleksandrov2024}; changing the pulse interface alone would not implement that extension. Recent nonadiabatic multi-component formulations further clarify relations between kinetic variables and the Wigner description \cite{LiJiang2026}. In the fixed-axis model, using instantaneous basis states does not introduce a slow-field approximation into Eq.~\eqref{eq:qke}; the time evolution remains nonperturbative within the prescribed-field assumptions.
 
 \subsection{Exact benchmark and integrated density}
 
@@ -87,7 +230,7 @@ For a single Sauter pulse, define $\lambda=qE_0\tau^2$ and
 \begin{equation}
   \omega_{\pm}=\sqrt{m^2+(p\pm qE_0\tau)^2}.
 \end{equation}
-The asymptotic occupation per fermionic mode is \cite{Hebenstreit2010}
+Here the minus sign labels the initial energy at $t\to-\infty$ and the plus sign labels the final energy at $t\to+\infty$, since $A(-\infty)=+E_0\tau$ and $A(+\infty)=-E_0\tau$. Appendix~\ref{app:sauterderivation} derives the scattering coefficients and the normalization of the result. The asymptotic occupation per fermionic mode is \cite{Hebenstreit2010}
 \begin{equation}
   f_p^{\mathrm{exact}}=
   \frac{\cosh(2\pi\lambda)-
@@ -95,27 +238,67 @@ The asymptotic occupation per fermionic mode is \cite{Hebenstreit2010}
   {2\sinh(\pi\tau\omega_+)\sinh(\pi\tau\omega_-)}.
   \label{eq:exact}
 \end{equation}
-No additional spin-degeneracy factor is included. The spin-summed distribution in Eq.~(99) of Ref.~\cite{Hebenstreit2010}, at zero transverse momentum, is twice the per-mode occupation used here. The implementation evaluates an algebraically equivalent logarithmic expression to reduce overflow of the hyperbolic functions. This does not guarantee relative accuracy at arbitrarily small occupations. Equation~\eqref{eq:exact} is applied only to a single Sauter pulse.
+No additional spin-degeneracy factor is included. The spin-summed distribution in Eq.~(99) of Ref.~\cite{Hebenstreit2010}, at zero transverse momentum, is twice the per-mode occupation used here. The implementation evaluates an algebraically equivalent logarithmic expression with rationalized energy gaps and stable small-argument factors. The public log-occupation function retains values below ordinary floating-point underflow. Unrepresentable kinematics raise an exception rather than being mapped silently to zero. This does not guarantee relative accuracy at arbitrarily small occupations. Equation~\eqref{eq:exact} is applied only to a single Sauter pulse.
 
-The momentum-integrated observable is the density for one mode species in one spatial dimension,
+The momentum integral in Ref.~\cite{LiGong2021}, Eq.~(13), becomes, for one mode species in one spatial dimension,
 \begin{equation}
   n_{1\mathrm D}=\int\frac{dp}{2\pi}f_p.
   \label{eq:density}
 \end{equation}
-It has dimensions of inverse length and is reported in units of $m$. It is not a three-dimensional density. Numerical values use the trapezoidal rule on a finite interval $[-P,P]$; the number of nodes and the interval width are refined separately.
+To see the measure, impose periodic boundary conditions in a box of length $L_x$. Then $p_j=2\pi j/L_x$ and the expected number per channel is $N=\sum_j f_{p_j}$. Dividing by $L_x$ and using the mode spacing $\Delta p=2\pi/L_x$ gives $N/L_x\to\int dp\,f_p/(2\pi)$ as $L_x\to\infty$. This counts pairs through the occupation of one member of each produced pair; counting particles plus antiparticles would require a different stated observable. It has dimensions of inverse length and is reported in units of $m$. It is not a three-dimensional density. Numerical values use the trapezoidal rule on a finite interval $[-P,P]$; the number of nodes and the interval width are refined separately.
+
+\subsection{Dimensionless parameters and physical consistency limits}
+The dimensions $[p]=[m]$, $[t]=[m]^{-1}$ and $[qE]=[m]^2$ imply that a single-pulse occupation depends only on
+\begin{equation}
+ \bar p=p/m,\qquad \bar\tau=m\tau,\qquad
+ \varepsilon=qE_0/m^2,
+ \qquad \gamma=\frac{m}{qE_0\tau}=\frac1{\varepsilon\bar\tau}.
+\end{equation}
+The last parameter is the Sauter-pulse Keldysh parameter \cite[Sec.~II.C.2]{Hebenstreit2010}; it compares the mass scale with the pulse impulse and does not replace the separate numerical resolution controls. In units $\bar t=mt$, Eq.~\eqref{eq:dirac} becomes $i\partial_{\bar t}\psi=[(\bar p-qA/m)\sigma_1+\sigma_3]\psi$. This explains the mass/charge scaling used in the software tests. Occupation is dimensionless, while $n_{1\mathrm D}/m$ is the dimensionless density.
+
+Several limits check the interpretation and the analytic normalization. If $E_0=0$, the Hamiltonian is constant, its negative-energy state acquires only a phase, and $f_p=0$. In the specified centered gauge, reversing $p$ interchanges $\omega_+$ and $\omega_-$, so the exact Sauter spectrum is even in $p$. A constant shift of $A$ translates the canonical-momentum label as described above; it does not change an occupation at fixed kinetic momentum.
+
+For a weak field at fixed $p,m,\tau$, let $\omega_0=\sqrt{m^2+p^2}$ and $a=qE_0\tau$. Expanding $\omega_+-\omega_-=2pa/\omega_0+O(a^3)$ in the product form of Appendix~\ref{app:sauterderivation} gives
+\begin{equation}
+ f_p=\frac{(\pi qE_0\tau^2)^2m^2}
+ {\omega_0^2\sinh^2(\pi\tau\omega_0)}+O(E_0^4).
+ \label{eq:weaklimit}
+\end{equation}
+Thus the probability vanishes quadratically, rather than becoming a finite numerical offset. This limit keeps the duration fixed and is distinct from a long-pulse limit.
+
+For $\tau\to\infty$ at fixed $E_0>0,m,p$, the impulse $a=qE_0\tau$ grows without bound. With $r=|p|$,
+\begin{equation}
+ S=\sqrt{m^2+(r+a)^2}+\sqrt{m^2+(r-a)^2}
+ =2a+\frac{m^2a}{a^2-r^2}+O(a^{-3}).
+\end{equation}
+All small-hyperbolic-factor corrections in Eq.~\eqref{eq:stablelog} vanish, while $\pi\tau(S-2a)\to\pi m^2/(qE_0)$. Hence the fixed-momentum limit is
+\begin{equation}
+ f_p\longrightarrow\exp[-\pi m^2/(qE_0)].
+ \label{eq:longpulselimit}
+\end{equation}
+This is the one-channel constant-field tunnelling factor, consistent with Eq.~(75) of Ref.~\cite{Hebenstreit2010} after removing its spin sum. It is not a statement that the finite-pulse total density or a production rate stays constant as the duration grows: the populated momentum interval also grows. Neither Eq.~\eqref{eq:weaklimit} nor Eq.~\eqref{eq:longpulselimit} is used to replace the exact expression in the numerical solver.
 
 \section{Numerical method and validation protocol}
 \label{sec:software}
 
+\subsection{Software interface and computational cost}
+
+The public functions \texttt{solve\_dirac\_mode} and \texttt{solve\_qke\_mode} accept a canonical momentum, pulse object, mass, charge magnitude, tail factor, solver tolerances, step-cap coefficient and optional absolute \texttt{max\_step}. They return a \texttt{ModeResult} containing occupation, final-time diagnostic, function-evaluation count and time span. \texttt{SauterPulse} supplies a single pulse, and \texttt{PulseTrain} sums the supplied fields and potentials. A custom pulse must implement \texttt{field(t)}, \texttt{potential(t)} and \texttt{time\_window(tail\_factor)}. The Gaussian example exercises this interface. \texttt{sauter\_exact\_occupation} is specific to a single Sauter pulse; \texttt{integrated\_density} applies the measure in Eq.~\eqref{eq:density} after sorting the supplied momenta. It rejects nonfinite arrays and duplicate nodes, and offers optional occupation-bound validation without clipping roundoff-sized negative values.
+
+The implementation integrates each momentum separately. Each right-hand-side evaluation operates on a fixed-size state, but the adaptive step count depends on momentum, pulse duration and solver controls. Total work is proportional to the sum of the mode-specific evaluation counts. Since \texttt{solve\_ivp} retains accepted-step states in this implementation, per-mode storage grows with the accepted-step count; it is not constant-memory endpoint-only propagation. Parallel execution distributes modes among subprocesses. The 41-mode single- and double-pulse reproductions required respectively 452,900 and 349,628 combined Dirac/QKE right-hand-side evaluations. The observed timings are given in the Program Summary; no speedup relative to other software is claimed.
+
 \subsection{Integration controls and endpoint conventions}
 
-Both initial-value problems use SciPy's DOP853 implementation through \texttt{solve\_ivp}. Unless specified otherwise, the relative and absolute tolerances are $2\times10^{-10}$ and $2\times10^{-12}$. For a single pulse, a dimensionless tail extent $\ell$ gives endpoints $t_i=t_c-\ell\tau$ and $t_f=t_c+\ell\tau$. For a pulse train, the integration interval spans the union of these individual intervals. The default is $\ell=12$. In the single-pulse window scans, $L=\ell\tau$ denotes the physical half-width.
+Both initial-value problems use SciPy's eighth-order explicit DOP853 implementation through \texttt{solve\_ivp} \cite{Virtanen2020}. Unless specified otherwise, the relative and absolute tolerances are $2\times10^{-10}$ and $2\times10^{-12}$. For a single pulse, a dimensionless tail extent $\ell$ gives endpoints $t_i=t_c-\ell\tau$ and $t_f=t_c+\ell\tau$. For a pulse train, the integration interval spans the union of these individual intervals. The default is $\ell=12$. In the single-pulse window scans, $L=\ell\tau$ denotes the physical half-width.
 
-For each mode, 257 equally spaced times in the integration interval are used to estimate the largest instantaneous frequency, $\widehat\omega_{\max}$. The maximum internal step is $c_h/\widehat\omega_{\max}$, with default $c_h=0.18$. This sampled cap limits steps on the estimated oscillation scale; it is an empirical control rather than a rigorous frequency bound for arbitrary pulse shapes. Changes in tolerance and $c_h$ are therefore tested independently.
+For each mode, 257 equally spaced times estimate the largest instantaneous frequency, $\widehat\omega_{\max}$. The phase-based cap is $c_h/\widehat\omega_{\max}$, with default $c_h=0.18$. The implementation also caps the step at one eighth of the shortest active Sauter duration; a custom profile may expose \texttt{resolution\_scale()} with the same interpretation. An explicitly supplied \texttt{max\_step} further reduces the cap. A custom profile without a feature scale or explicit cap produces a warning because a phase cap alone can miss a narrow source. These are empirical controls, not a general frequency or local-feature bound. Tolerance and cap refinements remain necessary.
 
 The Dirac and kinetic state equations are implemented separately but use the same time integrator, interval, tolerances and cap rule. Their agreement tests consistency of the state representations, while the exact Sauter result and independent refinement studies test errors that can be common to both. Pulse objects must supply consistent $E(t)$ and $A(t)$ and suitable endpoints. The software interface does not enforce those physical conditions automatically.
 
-The calculations were performed in Python using NumPy and SciPy. Source code, reproduction instructions, software requirements and execution checks are provided in the accompanying computational archive, including its \texttt{REPRODUCIBILITY.txt} notes.
+\subsection{Additional integration implementation}
+\label{sec:independent}
+
+We also construct the Hamiltonian and its endpoint eigensystems separately in QuTiP~5.2.2 \cite{Lambert2026}, and evolve the negative-energy state with \texttt{sesolve} using its \texttt{vern9} integrator. Output normalization is disabled so that norm drift remains visible. This calculation uses the same analytic potential and endpoint convention, but neither the PairPulse right-hand side nor its analytic eigenvector helper. The relative and absolute tolerances are $2\times10^{-12}$ and $2\times10^{-14}$, with $c_h=0.09$ and $\ell=20$ for the single- and double-pulse grids. Gaussian checks use the endpoint and cap combinations stated in Section~\ref{sec:profiles}. This supplies a different integration implementation, not a third physical model or a test of independently specified field data. Shared endpoint or momentum-domain bias can remain even if all implementations agree.
 
 \subsection{Error measures and acceptance criteria}
 
@@ -133,145 +316,152 @@ The benchmark error includes the effects of finite endpoints, numerical integrat
 \end{equation}
 These are endpoint diagnostics, not maxima along a trajectory or bounds on $\epsilon_p^X$. For density refinement, successive estimates are compared using $|n_{\mathrm{new}}-n_{\mathrm{old}}|/|n_{\mathrm{new}}|$.
 
-The additional validation studies comprise 1,962 individual mode evaluations: 180 for integration controls, 60 for endpoints, 234 for Sauter parameter coverage, 40 for a Gaussian profile, 962 for momentum integration and 486 for density sensitivity to time-evolution controls. These counts are separate from the illustrative spectra and the momentum--window map. All reported evaluations completed without integration failures. The recorded protocol requires occupation differences below $10^{-10}$, relative Sauter errors below $10^{-5}$ for exact occupations at least $10^{-10}$, successive relative density changes below $10^{-4}$, and occupations within $[0,1]$ to a tolerance of $10^{-10}$. These are empirical acceptance criteria. Unsuccessful integrations are retained by the scripts rather than discarded. The reference spectrum below also reports relative errors using its explicitly stated $10^{-12}$ occupation threshold.
+The validation studies comprise 2,228 individual mode evaluations: 180 for integration controls, 60 for endpoints, 234 for Sauter parameter coverage, 60 for a Gaussian profile, 962 for momentum integration, 486 for density sensitivity to time-evolution controls, and 246 for the separate-integrator comparisons on the single- and double-pulse grids. These counts are separate from the illustrative spectra and the momentum--window map. All evaluations completed without integration failures.
+
+The acceptance criteria require occupation differences below $10^{-10}$, relative Sauter errors below $10^{-5}$ for exact occupations at least $10^{-10}$, successive relative density changes below $10^{-4}$, and occupations within $[0,1]$ to a tolerance of $10^{-10}$. Final norm and kinetic-invariant residuals must be below $10^{-8}$. Before these criteria are applied, the analysis checks that each specified calculation is present once, that its parameters and endpoints agree with the prescribed case, and that its numerical results are finite. Analytic discrepancies are recomputed from the recorded occupations. Incomplete or inconsistent results are not accepted. These are empirical validation criteria, not rigorous error bounds. The reference spectrum below also reports relative errors using its explicitly stated $10^{-12}$ occupation threshold.
+
+\subsection{Separating density-error contributions}
+\label{sec:budget}
+
+Let $f_\infty(p)$ denote the asymptotic occupation, $f_T(p)$ the exact-in-time solution for the selected finite endpoints, and $\widehat f_T(p)$ the numerical approximation. Let $p_0=-P<\cdots<p_N=P$ be the momentum nodes and $h_j=p_{j+1}-p_j$. The trapezoidal rule including the physical measure is
+\begin{equation}
+ Q_{P,h}g=\frac1{2\pi}\sum_{j=0}^{N-1}\frac{h_j}{2}
+          [g(p_j)+g(p_{j+1})]=\sum_{j=0}^{N}w_jg(p_j).
+ \label{eq:quadratureweights}
+\end{equation}
+Every $w_j$ is positive, and applying the rule to $g=1$ gives $\sum_jw_j=2P/(2\pi)=P/\pi$. Consequently $|Q_{P,h}g|\leq(P/\pi)\max_j|g(p_j)|$, including nonuniform grids.
+
+Add and subtract the two exact spectra evaluated by the same quadrature:
+\begin{align}
+ n_{1\mathrm D}-Q_{P,h}\widehat f_T
+ &=\int_{|p|>P}\frac{dp}{2\pi}f_\infty(p)\nonumber\\
+ &\quad+\left[\int_{-P}^{P}\frac{dp}{2\pi}f_\infty(p)-Q_{P,h}f_\infty\right]\nonumber\\
+ &\quad+Q_{P,h}(f_\infty-f_T)+Q_{P,h}(f_T-\widehat f_T).
+ \label{eq:budgetsplit}
+\end{align}
+The first term is omitted spectral weight, the second is quadrature error for the exact spectrum, the third is finite-endpoint error, and the fourth is time-integration error. With $f_\infty\geq0$, define
+\begin{align}
+ T_P&=\int_{|p|>P}\frac{dp}{2\pi}f_\infty(p),\nonumber\\
+ \epsilon_{\rm quad}&=\left|\int_{-P}^{P}\frac{dp}{2\pi}f_\infty(p)-Q_{P,h}f_\infty\right|,\nonumber\\
+ \epsilon_{\rm window}&=\max_j|f_\infty(p_j)-f_T(p_j)|,\qquad
+ \epsilon_{\rm int}=\max_j|f_T(p_j)-\widehat f_T(p_j)|.\nonumber
+\end{align}
+The triangle inequality and the sum of the positive weights then yield
+\begin{equation}
+ |n_{1\mathrm D}-Q_{P,h}\widehat f_T|
+ \leq T_P+\epsilon_{\rm quad}
+ +\frac{P}{\pi}(\epsilon_{\rm window}+\epsilon_{\rm int}).
+ \label{eq:budget}
+\end{equation}
+Equation~\eqref{eq:budget} is an error decomposition, not a computable a posteriori certificate: the exact quantities on its right are generally unknown. Tolerance and cap changes probe integration sensitivity; endpoint changes probe initialization and observation sensitivity; spacing changes probe quadrature; interval extension probes omitted tails. Successive approximations can share a bias, so their differences do not automatically bound the corresponding exact errors. Likewise, the Dirac--QKE difference can be small while either common truncation term remains large.
 
 \FloatBarrier
 \section{Results}
 \label{sec:results}
-
-\subsection{Sauter spectrum and asymptotic benchmark}
-
-The reference pulse has $E_0=0.3$, $\tau=2$ and $t_c=0$, with 41 equally spaced momenta on $[-1.5,1.5]$. Figure~\ref{fig:sauter} compares both formulations at $\ell=12$ with the exact asymptotic spectrum. The largest absolute errors are $7.48\times10^{-13}$ for Dirac evolution and $7.54\times10^{-13}$ for QKE. Over modes with $f_p^{\mathrm{exact}}>10^{-12}$, each formulation has maximum relative error $1.68\times10^{-8}$. The maximum final-time norm and kinetic-invariant errors across the grid are $6.24\times10^{-13}$ and $9.13\times10^{-13}$, respectively.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.78\linewidth]{figure1_sauter_validation.pdf}
-  \caption{Single-pulse occupation spectrum for $E_0=0.3$, $\tau=2$, $t_c=0$, and $m=q=1$, evaluated at 41 equally spaced canonical momenta in $[-1.5,1.5]$. The black line is the exact asymptotic Sauter result; circles and crosses denote Dirac and quantum-kinetic modes integrated over $[-12\tau,12\tau]$. The numerical results lie on the exact curve at this resolution. The vertical axis is logarithmic; markers represent deterministic calculations, with no statistical error bars.}
-  \label{fig:sauter}
+\subsection{Reference spectrum and temporal endpoints}
+The reference pulse has $E_0=0.3$, $\tau=2$, $t_c=0$ and $m=q=1$. Figure~\ref{fig:sauter} uses 41 equally spaced momenta on $[-1.5,1.5]$, tail extent $\ell=12$ and the default integration controls. The maximum absolute errors are $7.48\times10^{-13}$ for Dirac and $7.54\times10^{-13}$ for QKE. For exact occupations above $10^{-12}$, the maximum relative errors are $1.68\times10^{-8}$ and $1.68\times10^{-8}$. The maximum final norm and invariant residuals are $6.29\times10^{-13}$ and $9.13\times10^{-13}$. These are measured discrepancies in this run, not guaranteed accurate-digit counts.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.78\linewidth]{figure1_sauter_validation.pdf}
+\caption{Reference Sauter spectrum with $E_0=0.3$, $\tau=2$ and $m=q=1$. Both numerical formulations use 41 canonical momenta on $[-1.5,1.5]$ and endpoints $\pm12\tau$. The exact curve is the asymptotic per-mode occupation. Agreement at plot resolution is supplemented by the tabulated numerical errors.}\label{fig:sauter}
 \end{figure}
 
-At zero momentum, $f_0^{\mathrm{exact}}=8.11991615993\times10^{-4}$. Table~\ref{tab:tail} shows that increasing $L/\tau$ from 6 to 12 at fixed solver controls reduces the absolute discrepancy by more than five orders of magnitude. At $L/\tau=14$, the discrepancies are of order $10^{-14}$. The close correspondence of the two error sequences illustrates a shared sensitivity to finite endpoints. This scan alone does not isolate residual tail error from integration error and roundoff; the separate refinements in Section~\ref{sec:refinement} address that distinction.
-
-\begin{table}[tp]
-  \centering
-  \small
-  \caption{Finite-window convergence at $p=0$ for $E_0=0.3$, $\tau=2$, $t_c=0$, and $m=q=1$. Endpoints are $t_i=-L$, $t_f=L$. Both solvers use relative tolerance $2\times10^{-10}$, absolute tolerance $2\times10^{-12}$, and the step cap in Section~\ref{sec:software}. Errors are absolute differences from Eq.~\eqref{eq:exact}; numerical tolerances are held fixed as $L$ varies.}
-  \label{tab:tail}
-  \begin{tabular}{rrrr}
-    \toprule
-    Tail half-width $L/\tau$ & Exact & Dirac absolute error & QKE absolute error\\
-    \midrule
-    6  & $8.11991615993\times10^{-4}$ & $1.1762\times10^{-7}$ & $1.1762\times10^{-7}$\\
-    8  & $8.11991615993\times10^{-4}$ & $2.1989\times10^{-9}$ & $2.1989\times10^{-9}$\\
-    10 & $8.11991615993\times10^{-4}$ & $4.0728\times10^{-11}$ & $4.0721\times10^{-11}$\\
-    12 & $8.11991615993\times10^{-4}$ & $7.4813\times10^{-13}$ & $7.5435\times10^{-13}$\\
-    14 & $8.11991615993\times10^{-4}$ & $1.2825\times10^{-14}$ & $6.7149\times10^{-15}$\\
-    \bottomrule
-  \end{tabular}
-\end{table}
+At $p=0$, the exact occupation is $8.11991615993\times10^{-4}$. Table~\ref{tab:tail} holds tolerances and the cap fixed while varying both endpoints. At $\ell=6$, the formulation difference is $6.29\times10^{-15}$, whereas both asymptotic errors are about $1.18\times10^{-7}$. Thus cross-formulation agreement within $10^{-10}$ does not imply asymptotic accuracy within $10^{-10}$. Initialization and observation errors can also partially cancel; separate movement of the two endpoints is recommended when diagnosing a new profile.
+\begin{table}[htbp]\centering\small
+\caption{Zero-momentum endpoint scan for the reference Sauter pulse. Both solvers use rtol $2\times10^{-10}$, atol $2\times10^{-12}$ and $c_h=0.18$. Entries are absolute discrepancies from the asymptotic benchmark.}\label{tab:tail}
+\begin{tabular}{rrr}\toprule
+$\ell$ & Dirac error & QKE error\\\midrule
+6 & $1.1762\times10^{-7}$ & $1.1762\times10^{-7}$\\
+8 & $2.1989\times10^{-9}$ & $2.1989\times10^{-9}$\\
+10 & $4.0728\times10^{-11}$ & $4.0721\times10^{-11}$\\
+12 & $7.4826\times10^{-13}$ & $7.5434\times10^{-13}$\\
+14 & $1.2776\times10^{-14}$ & $6.7063\times10^{-15}$\\
+\bottomrule\end{tabular}\end{table}
 
 \subsection{Separated-pulse spectrum}
-
-The second field is a sum of two same-polarity Sauter pulses, each with $E_0=0.3$ and $\tau=1.1$, centred at $t_c=\pm3.5$. With $\ell=12$, the common integration interval is $[-16.7,16.7]$. Figure~\ref{fig:double} displays 41 equally spaced momenta on $[-1.8,1.8]$. Both formulations resolve the central maximum and its adjacent shoulders and modulations; their largest absolute occupation difference is $1.18\times10^{-13}$. This comparison extends the numerical consistency check to a field for which no closed-form spectrum is used in the study.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.78\linewidth]{figure2_double_pulse.pdf}
-  \caption{Occupation spectrum for two separated, same-polarity Sauter pulses, each with $E_0=0.3$ and $\tau=1.1$, centred at $t_c=\pm3.5$, with $m=q=1$. Circles with a solid line and crosses with a dashed line denote Dirac and quantum-kinetic calculations on 41 equally spaced canonical momenta in $[-1.8,1.8]$. Endpoints are $t_i=-16.7$, $t_f=16.7$. Lines join computed modes; no analytic curve is supplied for this case.}
-  \label{fig:double}
+Two same-polarity pulses each have $E_0=0.3$, $\tau=1.1$ and centers $t_c=\pm3.5$. At $\ell=12$ the integration interval is $[-16.7,16.7]$. The 41-point spectrum on $[-1.8,1.8]$ has maximum formulation difference $9.61\times10^{-14}$. No exact double-pulse solution or new interference mechanism is inferred from this agreement.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.78\linewidth]{figure2_double_pulse.pdf}
+\caption{Separated same-polarity Sauter pulses with $E_0=0.3$, $\tau=1.1$, centers $\pm3.5$ and $m=q=1$. Both formulations use 41 canonical momenta on $[-1.8,1.8]$ and endpoints $\pm16.7$. Lines join calculated modes.}\label{fig:double}
 \end{figure}
 
-The agreement establishes that the displayed structure is reproduced by both state representations at matching numerical settings. Attribution of individual features to a particular interference mechanism would require additional analysis of their dependence on pulse parameters or of the relevant amplitudes and phases. The present calculation does not make that attribution.
-
-On the finite grids in Figures~\ref{fig:sauter} and \ref{fig:double}, trapezoidal integration gives $n_{1\mathrm D}=1.13951\times10^{-4}$ for the exact single-pulse spectrum and $1.69199\times10^{-3}$ for the double-pulse spectrum. Section~\ref{sec:densityvalidation} examines how these estimates change when the momentum spacing and range are refined.
-
-\subsection{Conservation diagnostics and finite-window discrepancy}
-
-Figure~\ref{fig:invariant} shows the final-time kinetic-invariant error over the reference momentum grid. Its maximum is below $10^{-12}$. Conservation provides a check on integration of Eq.~\eqref{eq:qke}, but the invariant does not fix the occupation uniquely: it constrains the combined values of $f_p^{\mathrm K}$, $u_p$ and $v_p$. A small invariant error therefore complements, rather than replaces, an occupation benchmark.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.78\linewidth]{figure3_qke_invariant.pdf}
-  \caption{Final-time quantum-kinetic invariant error $|(1-2f_p)^2+u_p^2+v_p^2-1|$ for the single-pulse setup of Figure~\ref{fig:sauter}. Each marker corresponds to one of 41 momentum modes, evaluated at $t_f=12\tau$; the connecting line guides the eye. Values are plotted on a logarithmic scale with a display floor of $10^{-18}$. The diagnostic measures conservation of the invariant, not occupation error or a maximum over time.}
-  \label{fig:invariant}
+\subsection{Conservation and the momentum--window map}
+The final-time QKE invariant for the reference spectrum is shown in Figure~\ref{fig:invariant}. An invariant constrains the state geometry but does not fix the occupation. Figure~\ref{fig:window-error} retains all 41 momenta at six window half-widths, $\ell=4,6,8,10,12,14$. Its errors include finite endpoints, integration and floating-point effects; the smallest values should not be identified as pure tail errors.
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.78\linewidth]{figure3_qke_invariant.pdf}
+\caption{Final-time invariant residual for the reference single-pulse spectrum. The plotting floor is $10^{-18}$; this is not a trajectory maximum or an occupation-error bound.}\label{fig:invariant}
 \end{figure}
-
-Figure~\ref{fig:window-error} extends the endpoint comparison across 41 momenta and six half-widths, $L/\tau=4,6,8,10,12,14$, for the same $E_0=0.3$ and $\tau=2$ pulse. The common colour scale permits direct comparison of absolute discrepancies between the two formulations. The map records momentum dependence as well as convergence with window extent. Its values include finite-window, fixed-tolerance integration and roundoff effects; the smallest discrepancies cannot be identified as pure tail errors. The field remains spatially homogeneous, so the horizontal coordinate is momentum, not position.
-
-\begin{figure}[tp]
-  \centering
-  \includegraphics[width=0.94\textwidth]{figure4_sauter_window_error_map.pdf}
-  \caption{Absolute finite-window discrepancy $|f_p(L)-f_p^{\mathrm{exact}}|$ from the asymptotic Sauter benchmark: (a) Dirac modes and (b) quantum-kinetic modes, for $E_0=0.3$, $\tau=2$, $t_c=0$, and $m=q=1$. Each panel contains 41 momenta in $[-1.5,1.5]$ and six half-widths $L/\tau=4,6,8,10,12,14$; integration endpoints are $t_c\pm L$. The common logarithmic colour scale uses a display floor of $10^{-16}$ without changing the computed errors. Discrepancies include window, integration, and roundoff effects at fixed tolerances. The horizontal coordinate is canonical momentum, not position.}
-  \label{fig:window-error}
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.94\linewidth]{figure4_sauter_window_error_map.pdf}
+\caption{Absolute discrepancy from the exact asymptotic spectrum for (a) Dirac and (b) QKE on 41 canonical momenta and six window extents. $E_0=0.3$, $\tau=2$, $m=q=1$ and the default integration controls are fixed. Both panels use the same logarithmic scale and display floor $10^{-16}$.}\label{fig:window-error}
 \end{figure}
-
 \FloatBarrier
-\subsection{Integration and endpoint refinements}
+
+\subsection{Integration controls and independent endpoint refinements}
 \label{sec:refinement}
+At $\ell=20$, each pulse case is tested at $p=0,\pm0.75,\pm1.5$ with rtol $2\times10^{-8},2\times10^{-10},2\times10^{-12}$, atol one hundredth as large, and $c_h=0.18,0.09,0.045$. Both formulations give 180 evaluations. The maximum difference from the tightest same-formulation numerical reference is $3.41\times10^{-14}$. Differences need not decrease monotonically near roundoff. A further 60 evaluations vary $\ell=12,16,20$ at rtol $2\times10^{-12}$ and $c_h=0.045$; the maximum difference from $\ell=20$ is $7.48\times10^{-13}$. Solver tolerances control local state errors, not certified global errors in an asymptotic occupation. The returned diagnostics likewise remain endpoint residuals.
 
-At fixed tail extent $\ell=20$, the single- and double-pulse cases are each tested at $p=0,\pm0.75,\pm1.5$. The relative tolerance takes values $2\times10^{-8}$, $2\times10^{-10}$ and $2\times10^{-12}$, with absolute tolerance one hundredth as large. Independently, $c_h$ takes values 0.18, 0.09 and 0.045. Both formulations are run at all combinations, giving 180 evaluations. Relative to the same formulation at the tightest tolerance and cap, the largest absolute occupation difference is $8.46\times10^{-14}$. Refinement differences need not decrease monotonically near floating-point precision. For the double pulse, this comparison uses a refined numerical reference rather than an exact solution.
-
-A separate set of 60 evaluations varies $\ell$ through 12, 16 and 20 at relative tolerance $2\times10^{-12}$ and $c_h=0.045$. Relative to $\ell=20$, the largest occupation differences at $\ell=12$ are $7.48\times10^{-13}$ for the single pulse and $2.59\times10^{-13}$ for the double pulse. At $\ell=16$, they are below $2.51\times10^{-16}$ and $9.37\times10^{-16}$, respectively. Holding the tighter integration controls fixed separates this endpoint-sensitivity test from the preceding fixed-window study.
-
-\subsection{Field strength, duration and pulse profile}
-
-The exact benchmark is tested at all nine combinations of $E_0=0.1,0.3,0.8$ and $\tau=0.5,2,5$. Each pair uses 13 equally spaced momenta on $[-p_{\max},p_{\max}]$, with $p_{\max}=\max(1.5,E_0\tau+2/\tau)$ in the units specified in Section~\ref{sec:model}. The controls are $\ell=20$, relative tolerance $2\times10^{-12}$, absolute tolerance $2\times10^{-14}$ and $c_h=0.09$. Table~\ref{tab:parameter} summarizes the resulting 234 evaluations. The maximum absolute error is $4.58\times10^{-15}$, and the maximum relative error for exact occupations at least $10^{-10}$ is $1.83\times10^{-9}$. No negative occupations or upper-bound violations occur in this sweep. The smallest exact occupation is $7.81\times10^{-19}$; relative accuracy is not asserted at that scale.
-
-\begin{table}[htbp]
-\centering\small
-\caption{Maximum absolute Sauter occupation error over 13 momenta per parameter pair for $m=q=1$. The field strength and duration use the units defined in Section~\ref{sec:model}; integration settings are specified in the text.}
-\label{tab:parameter}
+\subsection{Field-strength and duration sweep}
+All nine pairs $E_0=0.1,0.3,0.8$ and $\tau=0.5,2,5$ use 13 momenta on $\pm\max(1.5,E_0\tau+2/\tau)$. With $\ell=20$, rtol $2\times10^{-12}$, atol $2\times10^{-14}$ and $c_h=0.09$, the 234 evaluations give maximum absolute error $2.10\times10^{-15}$ and maximum resolved relative error $1.29\times10^{-9}$ for exact occupations at least $10^{-10}$. No occupation-bound violation occurs. Relative accuracy is not asserted for arbitrarily small occupations.
+\begin{table}[htbp]\centering\small
+\caption{Maximum absolute Sauter occupation discrepancy over 13 momenta per parameter pair, $m=q=1$, at the refined controls stated in the text.}\label{tab:parameter}
 \begin{tabular}{rrrr}\toprule
 $E_0$ & $\tau$ & Dirac & QKE\\\midrule
-0.1 & 0.5 & $4.84\times10^{-17}$ & $8.19\times10^{-16}$\\
-0.1 & 2 & $4.02\times10^{-18}$ & $1.71\times10^{-18}$\\
-0.1 & 5 & $8.39\times10^{-20}$ & $4.12\times10^{-19}$\\
-0.3 & 0.5 & $9.71\times10^{-17}$ & $2.71\times10^{-15}$\\
-0.3 & 2 & $5.43\times10^{-17}$ & $2.76\times10^{-17}$\\
-0.3 & 5 & $5.90\times10^{-17}$ & $9.67\times10^{-18}$\\
-0.8 & 0.5 & $4.27\times10^{-15}$ & $4.58\times10^{-15}$\\
-0.8 & 2 & $6.45\times10^{-16}$ & $1.77\times10^{-16}$\\
-0.8 & 5 & $1.54\times10^{-15}$ & $1.42\times10^{-16}$\\
-\bottomrule\end{tabular}
-\end{table}
+0.1 & 0.5 & $8.26\times10^{-18}$ & $1.27\times10^{-16}$\\
+0.1 & 2 & $5.48\times10^{-18}$ & $9.42\times10^{-19}$\\
+0.1 & 5 & $2.15\times10^{-19}$ & $3.03\times10^{-19}$\\
+0.3 & 0.5 & $4.51\times10^{-17}$ & $7.11\times10^{-16}$\\
+0.3 & 2 & $6.10\times10^{-17}$ & $2.84\times10^{-17}$\\
+0.3 & 5 & $2.03\times10^{-17}$ & $9.87\times10^{-18}$\\
+0.8 & 0.5 & $2.36\times10^{-16}$ & $2.10\times10^{-15}$\\
+0.8 & 2 & $6.73\times10^{-16}$ & $1.08\times10^{-16}$\\
+0.8 & 5 & $1.36\times10^{-15}$ & $1.14\times10^{-16}$\\
+\bottomrule\end{tabular}\end{table}
 
-A smooth Gaussian field supplies a further comparison beyond the Sauter family,
-\begin{align}
-E(t)&=0.3\exp[-(t/2)^2],\nonumber\\
-A(t)&=-0.3\sqrt{\pi}\,\operatorname{erf}(t/2).
-\label{eq:gaussian}
-\end{align}
-These expressions satisfy $E=-\dot A$. Five momenta ($p=0,\pm0.75,\pm1.5$), two endpoint choices ($|t|=12,16$), two cap coefficients (0.09, 0.045) and both formulations give 40 evaluations at relative tolerance $2\times10^{-12}$. The largest absolute difference between formulations at matching settings is $1.31\times10^{-17}$. This tests consistency for a different smooth profile; no independent exact occupation is used for the Gaussian case.
+\subsection{Gaussian and separate-integrator comparisons}
+\label{sec:profiles}
+\label{sec:separate-results}
+The smooth custom field $E(t)=0.3\exp[-(t/2)^2]$, $A(t)=-0.3\sqrt{\pi}\,\operatorname{erf}(t/2)$ satisfies $E=-\dot A$. At five momenta, endpoints $|t|=12,16$, cap coefficients $0.09,0.045$, and three implementations, its 60 evaluations differ from the refined QuTiP reference by at most $6.04\times10^{-17}$. Its declared resolution scale is 2; no exact Gaussian occupation is assumed.
+
+The single- and double-pulse 41-point grids are also calculated with QuTiP/\texttt{vern9}, separately constructed eigensystems, and output normalization disabled. With $\ell=20$, rtol $2\times10^{-12}$ and $c_h=0.09$, these 246 evaluations give maximum discrepancy $5.13\times10^{-16}$ from QuTiP. The formulations share the potential and finite-time convention, so this does not test omitted momentum tails or remove endpoint bias.
+\begin{table}[htbp]\centering\small
+\caption{Maximum absolute discrepancy from QuTiP on each refined 41-point grid. These are observed floating-point differences.}\label{tab:separate}
+\begin{tabular}{lrr}\toprule
+Pulse & Dirac/DOP853 & QKE/DOP853\\\midrule
+Single Sauter & $1.44\times10^{-16}$ & $1.43\times10^{-16}$\\
+Separated pulses & $5.13\times10^{-16}$ & $4.15\times10^{-16}$\\
+\bottomrule\end{tabular}\end{table}
 
 \subsection{Momentum-integrated density}
 \label{sec:densityvalidation}
-
-The QKE density is first evaluated using 41, 81 and 161 nodes on each original momentum interval. The spacing of the 161-node grid is then held fixed while the interval is doubled and tripled, giving 321 and 481 nodes. A nested 481-node grid for each pulse case supplies 962 directly evaluated modes, without imposing spectrum symmetry. All use $\ell=20$, relative tolerance $2\times10^{-12}$, absolute tolerance $2\times10^{-14}$ and $c_h=0.09$.
-
-\begin{table}[htbp]
-\centering\small
-\caption{Trapezoidal density refinement using QKE. $P$ is the momentum half-width in units of $m$, $N_p$ is the number of nodes, and $n_{1\mathrm D}$ is in units of $m$. Grid spacing is refined at fixed $P$ before extending the domain at fixed spacing.}
-\label{tab:density}
+The nested QKE grids separate spacing refinement on a fixed interval from extension at fixed spacing. The 161-node spacing is retained on doubled and tripled domains with 321 and 481 nodes. All 962 modes are calculated without imposing symmetry, using $\ell=20$, rtol $2\times10^{-12}$, atol $2\times10^{-14}$ and $c_h=0.09$.
+\begin{table}[htbp]\centering\small
+\caption{Trapezoidal one-dimensional density in units of $m$. The domain half-width $P$ is in units of $m$.}\label{tab:density}
 \begin{tabular}{lrrr}\toprule
-Case & $P$ & $N_p$ & $n_{1\mathrm D}$\\\midrule
+Case & $P$ & Nodes & $n_{1\mathrm D}$\\\midrule
 Single & 1.5 & 41 & $1.1395114844\times10^{-4}$\\
- & 1.5 & 81 & $1.1395130337\times10^{-4}$\\
- & 1.5 & 161 & $1.1395134244\times10^{-4}$\\
- & 3.0 & 321 & $1.1395539392\times10^{-4}$\\
- & 4.5 & 481 & $1.1395539392\times10^{-4}$\\
+Single & 1.5 & 81 & $1.1395130337\times10^{-4}$\\
+Single & 1.5 & 161 & $1.1395134244\times10^{-4}$\\
+Single & 3 & 321 & $1.1395539392\times10^{-4}$\\
+Single & 4.5 & 481 & $1.1395539392\times10^{-4}$\\
 Double & 1.8 & 41 & $1.6919881473\times10^{-3}$\\
- & 1.8 & 81 & $1.6919976391\times10^{-3}$\\
- & 1.8 & 161 & $1.6920000711\times10^{-3}$\\
- & 3.6 & 321 & $1.6926588379\times10^{-3}$\\
- & 5.4 & 481 & $1.6926588400\times10^{-3}$\\
-\bottomrule\end{tabular}
-\end{table}
+Double & 1.8 & 81 & $1.6919976391\times10^{-3}$\\
+Double & 1.8 & 161 & $1.6920000711\times10^{-3}$\\
+Double & 3.6 & 321 & $1.6926588379\times10^{-3}$\\
+Double & 5.4 & 481 & $1.6926588400\times10^{-3}$\\
+\bottomrule\end{tabular}\end{table}
+For the double pulse, the final fixed-domain spacing change is $1.44\times10^{-6}$, while the following domain doubling changes the result by $3.89\times10^{-4}$. The latter exceeds the $10^{-4}$ criterion even though the spacing change is much smaller. The final extensions give relative changes $7.20\times10^{-13}$ and $1.21\times10^{-9}$ for single and double pulses. A further 486 evaluations on 81-node grids vary endpoints and halve the cap at $\ell=20$; the maximum relative density change is $4.98\times10^{-11}$. These final empirical criteria pass; they are not rigorous bounds on the full continuum integral.
 
-The final fixed-domain grid refinement changes the single- and double-pulse densities by relative amounts $3.43\times10^{-7}$ and $1.44\times10^{-6}$. However, doubling the momentum interval at that spacing changes the corresponding densities by approximately $3.56\times10^{-5}$ and $3.89\times10^{-4}$, as calculated from Table~\ref{tab:density}. The double-pulse change exceeds the prescribed $10^{-4}$ density criterion despite the much smaller fixed-domain grid change. Momentum-spacing convergence alone is therefore insufficient for this case.
+\subsection{Numerical stability of the analytic benchmark}
+The analytic evaluation separates the dominant Sauter exponential from the small hyperbolic factors and rationalizes energy gaps. Let $r=|p|$, $a=qE_0\tau$, $\Omega_+=\sqrt{m^2+(r+a)^2}$ and $\Omega_-=\sqrt{m^2+(r-a)^2}$. Then
+\begin{equation}
+\delta=\frac{m^2}{\Omega_++r+a}+\frac{m^2}{\Omega_-+|r-a|},\quad
+\Omega_++\Omega_-=2\max(r,a)+\delta.
+\end{equation}
+This identity avoids subtracting large nearly equal energies. Logarithmic \texttt{expm1}-based factors avoid small-argument cancellation, and \texttt{sauter\_log\_occupation} exposes underflowed yields. The 117 values on the parameter-sweep grids differ from independent 100-digit arithmetic by at most $2.35\times10^{-17}$. Additional checks of the analytic expression bring the total to 299 cases; its maximum absolute discrepancy is $2.45\times10^{-15}$ and maximum relative discrepancy for references above $10^{-300}$ is $4.50\times10^{-13}$. These checks assess the analytic expression; convergence of the differential-equation solutions must be tested separately throughout the extended parameter space.
 
-The final extension from twice to three times the original half-width changes the densities by $7.20\times10^{-13}$ and $1.21\times10^{-9}$, respectively. The largest difference between numerical and exact single-pulse densities on identical grids is below $1.71\times10^{-18}$. A further 486 evaluations on 81-node grids vary $\ell=12,16,20$ and halve the cap coefficient at $\ell=20$; the largest relative density change is $4.98\times10^{-11}$. The final grid, domain and time-evolution checks meet the $10^{-4}$ criterion. They provide finite refinement evidence, rather than a rigorous bound on the continuum integral.
+For example, $p=10$, $E_0=10^{-12}$, $\tau=0.01$, $m=q=1$ gives approximately $9.4836235793\times10^{-33}$ without loss of the small nonzero occupation through cancellation. At $p=0.7$, $E_0=10^4$, $\tau=10^3$, the occupation is approximately $0.9996858900774958$. A test with a narrow user-defined pulse shows that a maximum step based only on the instantaneous frequency can miss the pulse while preserving the kinetic invariant. Limiting the step according to the pulse duration improves temporal resolution, but convergence must still be checked. Twenty-one automated tests cover the analytic expression, pulse resolution, momentum-integration inputs, gauge and scaling relations, and the validation procedure.
 
-\FloatBarrier
+
 \section{Discussion}
 \label{sec:discussion}
 
@@ -279,21 +469,156 @@ The comparisons distinguish three questions: whether each state evolution preser
 
 The Sauter window scan illustrates why this distinction matters. At short windows, both formulations give nearly identical absolute errors relative to the asymptotic benchmark. They are initialized in the same finite-time vacuum and projected at the same finite endpoint, so agreement need not imply that pulse-tail effects are negligible. Extending the interval reduces the discrepancy strongly for the reference pulse. The separate integration-control study is needed to assess whether a remaining difference is sensitive to numerical evolution at a fixed interval. Values near machine precision should be interpreted as observed discrepancies for those calculations, not as general accuracy guarantees.
 
+The window test also differs from a physical change to the pulse. Moving the numerical endpoints while retaining the same analytic $E(t)$ and $A(t)$ tests an approximation to a fixed asymptotic problem. Intentionally modifying the switching profile defines a different external field and can change its production spectrum, as examined in Ref.~\cite{Aleksandrov2025}. Likewise, agreement on a finite-time occupation in the chosen basis does not remove the basis issue discussed in Ref.~\cite{Dabrowski2016}. These distinctions prevent truncation tests from being interpreted as new pulse-enhancement physics.
+
 The density study identifies a second, distinct truncation issue. Fine sampling of a restricted momentum interval can stabilize the trapezoidal estimate before the interval captures the relevant spectral tails. For the double pulse, the first domain enlargement changes the density by about $3.9\times10^{-4}$ even after the fixed-domain spacing check has converged much more closely. Separate variation of momentum spacing and range is thus necessary when using spectra to report integrated yields. The converged density estimates and occupation comparisons characterize the numerical cases studied here; differences between the single- and double-pulse yields are not interpreted as enhancement at fixed field energy or fluence.
 
-The assessment uses established pair-production equations and does not propose a new production mechanism or analytic solution. Its physical scope is a prescribed homogeneous field in one spatial dimension, without transverse momentum, spatial gradients, back-reaction, collisions or scalar particles. The finite set of Sauter, separated-pulse and Gaussian cases does not supply a parameter-independent error bound. Much weaker occupations, stronger or longer pulses, sharply structured fields and larger pulse trains require additional checks. For backgrounds without an exact result, comparison with a further independent numerical method would strengthen validation beyond the two state representations studied here. Computational scaling and high-throughput performance are outside the present assessment.
+The assessment builds on the established method equivalences and benchmarks \cite{Dumlu2009,Hebenstreit2010,LiGong2021}. Its added content is the documented separation of error channels in Eq.~\eqref{eq:budget}, the numerical examples showing how incomplete checks can pass, and the accompanying numerical data. It does not propose a new production mechanism or analytic solution. Its physical scope is a prescribed homogeneous field in one spatial dimension, without transverse momentum, spatial gradients, back-reaction, collisions or scalar particles. The finite set of Sauter, separated-pulse and Gaussian cases does not supply a parameter-independent error bound. Much weaker occupations, stronger or longer pulses, sharply structured fields and larger pulse trains require additional checks. The separate QuTiP integration tests dependence on the integrator and endpoint-eigenvector implementation. It still shares the prescribed potential and finite-time convention, so agreement cannot replace endpoint or momentum-range convergence. Computational scaling and high-throughput performance are outside the present assessment.
 
 \section{Conclusion}
+\PairPulse{} implements established Dirac and quantum-kinetic equations with explicit conventions, independently evaluated benchmarks and separate empirical refinements. The reported calculations satisfy the numerical criteria across all 2,228 validation evaluations, together with 21 software tests and 299 high-precision checks of the analytic expression. Its reference spectrum remains within $8\times10^{-13}$ absolute occupation error. The short-window and restricted-domain examples demonstrate why formulation agreement and fixed-domain spacing convergence alone are insufficient.
 
-We have compared Dirac-mode and quantum-kinetic calculations of fermion pair production using a common definition of the finite-time vacuum and final occupation. The reference Sauter spectrum is reproduced with maximum absolute error below $8\times10^{-13}$ at the stated default controls, while nine parameter pairs give a maximum error of $4.58\times10^{-15}$ at refined settings. The separated-pulse spectrum agrees between formulations within $1.18\times10^{-13}$. The additional 1,962 mode evaluations separate integration-control, endpoint, pulse-profile and momentum-integration checks.
+The program checks that all prescribed calculations are present and satisfy the physical bounds, limits the integration step according to the pulse duration, and evaluates the analytic benchmark using numerically stable expressions. The source code, calculation scripts, demonstration notebook, and numerical data accompany the manuscript. These results support the specified examples; they do not establish a new physical mechanism, a general accuracy theorem or superiority to more general solvers.
 
-The central numerical result is the distinction between consistency of state evolution and convergence of physical observables. In the reported cases, endpoint extension is essential for comparison with an asymptotic spectrum, and domain extension is essential for the double-pulse density even after momentum-spacing refinement. The final density checks meet the prescribed $10^{-4}$ relative criterion. The accompanying implementation provides a reproducible basis for these comparisons and for further validation within the stated homogeneous-field model.
+\ack{The author acknowledges Palestine Polytechnic University for its support.}
 
-\section*{Data availability}
-The source code, detailed execution notes, reproduction and validation scripts, and notebook are available in \texttt{Supplementary\_code.zip} at \url{https://github.com/ozalloum/Fermion-Pair-Production}. These scripts generate the numerical datasets and diagnostics used in this study.
+\funding{This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.}
+
+\roles{Othman H. Y. Zalloum: Conceptualization, Methodology, Software, Validation, Formal analysis, Investigation, Resources, Data curation, Visualization, Project administration, Writing--original draft, Writing--review and editing.}
+
+\data{The \PairPulse{} source code is openly available under the MIT license at \url{https://github.com/ozalloum/Fermion-Pair-Production}. The accompanying supplementary material contains version 0.2.2 used in this study, the numerical data underlying the figures and tables, and the calculation and plotting scripts, software requirements, and demonstration notebook needed to reproduce the reported results.}
 
 \section*{Declaration of competing interest}
 The author declares that there are no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+
+
+\FloatBarrier
+\appendix
+\section{Reproducing the numerical results}
+\label{app:reproduction}
+
+\subsection{Computational environment}
+The calculations reported in this article used \PairPulse{} 0.2.2 with Python 3.13.9, NumPy 2.3.5, SciPy 1.16.3, and Matplotlib 3.10.6 on Windows. QuTiP 5.2.2 provided the separate integration comparison, and mpmath 1.3.0 was used for the 100-digit evaluation of the analytic Sauter expression. The software distribution specifies the required library versions and provides installation instructions. The demonstration notebook illustrates the single-pulse benchmark and the separated-pulse spectrum.
+
+\subsection{Calculation sequence and supplied data}
+The supplementary material provides the pulse parameters, momentum grids, temporal endpoints, integration tolerances, and maximum-step controls for each calculation. The reference spectra are obtained by evolving the Dirac and quantum-kinetic equations at 41 momenta and comparing the single-pulse result with Eq.~\eqref{eq:exact}. The convergence studies then vary the integration controls, temporal endpoints, momentum spacing, and momentum range separately, as described in Sections~\ref{sec:software} and~\ref{sec:results}.
+
+For each of the 2,228 validation evaluations, the supplied data record the occupation, final conservation diagnostic, numerical controls, and integration outcome. The single-pulse records also include the analytic occupation. The table-generation scripts recompute the discrepancies from these values and check the completeness of the parameter sets and the acceptance criteria stated in Section~\ref{sec:software}. Failed or incomplete calculations are identified explicitly. Separate plotting scripts reconstruct the figures from the supplied numerical tables, so figure reproduction does not require repeating the integrations.
+
+The distribution also includes 21 automated software tests, the 299-case high-precision comparison of the analytic expression, and checks of the transformations derived in Section~\ref{sec:mapping} and Appendix~\ref{app:sauterderivation}. These checks complement the convergence studies; they do not establish accuracy for every possible field profile or parameter choice. Detailed commands and file descriptions are given in the accompanying user guide.
+
+\subsection{Reproduction and extension of the calculations}
+Reproduction requires matching the field and potential, canonical-momentum convention, initial state, and numerical endpoints, as well as the integration and quadrature settings. For a user-defined field, $E(t)=-\dot A(t)$ must hold, and the maximum integration step must resolve the shortest relevant temporal feature. Endpoint, step-size, momentum-spacing, and momentum-range refinements should then be repeated independently. Small differences in the last displayed digits and execution times may occur between computing environments; comparisons should use the stated numerical criteria rather than exact equality of floating-point output.
+
+\section{Detailed Sauter benchmark derivation}
+\label{app:sauterderivation}
+\subsection{From the Dirac mode to the hypergeometric equation}
+This appendix derives the single-pulse expression in the conventions of Eq.~\eqref{eq:dirac}, and then its stable numerical form. The Sauter solution is established \cite[Sec.~II.C.2, Eqs.~(77)--(99)]{Hebenstreit2010}; the steps below specify the channel normalization and signs used here. Set $t_c=0$ without loss of occupation information: translating the pulse changes asymptotic phases, not transition probabilities. Write $a=qE_0\tau$, $\lambda=a\tau$, and $\omega_\pm=\sqrt{m^2+(p\pm a)^2}$. Assume $a>0$ during the derivation; the zero-field result follows separately as $f=0$.
+
+Differentiating $\dot\psi=-iH\psi$ gives
+\begin{equation}
+ \ddot\psi+[\omega^2+i\dot\pi\,\sigma_1]\psi=0,
+ \qquad \dot\pi=qE.
+\end{equation}
+Take the component $\chi=\langle+_x|\psi\rangle$ along the constant eigenvector of $\sigma_1$ with eigenvalue $+1$. It satisfies
+\begin{equation}
+ \ddot\chi+[m^2+\pi(t)^2+iqE(t)]\chi=0.
+ \label{eq:sauterscalar}
+\end{equation}
+This scalar equation alone allows two solutions; the original first-order Dirac equation fixes their spinor normalization. That normalization is retained below rather than identifying an arbitrary scalar amplitude with a probability.
+
+Introduce $y=[1+\tanh(t/\tau)]/2$, so
+\begin{equation}
+ \dot y=\frac2\tau y(1-y),\quad
+ \pi=p-a+2ay,\quad qE=\frac{4a}{\tau}y(1-y).
+\end{equation}
+Dividing Eq.~\eqref{eq:sauterscalar} by $\dot y^2$ yields
+\begin{equation}
+ \chi''+\frac{1-2y}{y(1-y)}\chi'
+ +\left\{\frac{\tau^2[m^2+(p-a+2ay)^2]}{4y^2(1-y)^2}
+          +\frac{i\lambda}{y(1-y)}\right\}\chi=0,
+ \label{eq:sautery}
+\end{equation}
+where primes in this appendix denote $y$ derivatives. At early time $y\sim e^{2t/\tau}$, so the incoming negative-energy mode $e^{+i\omega_-t}$ has power $y^{\alpha_0}$ with $\alpha_0=i\tau\omega_-/2$. At late time $1-y\sim e^{-2t/\tau}$, the outgoing positive-energy mode $e^{-i\omega_+t}$ has power $(1-y)^{\beta_0}$ with $\beta_0=i\tau\omega_+/2$. Substitute
+\begin{equation}
+ \chi=y^{\alpha_0}(1-y)^{\beta_0}F(y).
+\end{equation}
+The singular terms cancel because $\alpha_0^2=-\tau^2\omega_-^2/4$ and $\beta_0^2=-\tau^2\omega_+^2/4$. The remaining equation is the Gauss hypergeometric equation \cite[Eq.~15.10.1]{DLMF},
+\begin{equation}
+ y(1-y)F''+[C-(A+B+1)y]F'-ABF=0,
+\end{equation}
+with
+\begin{equation}
+ A=\alpha_0+\beta_0-i\lambda,\quad
+ B=\alpha_0+\beta_0+1+i\lambda,\quad C=1+2\alpha_0.
+ \label{eq:hyperparameters}
+\end{equation}
+In particular, $AB=(\alpha_0+\beta_0)(\alpha_0+\beta_0+1)+\lambda^2-i\lambda$, which fixes the sign of the spinor term in Eq.~\eqref{eq:sautery}. The incoming solution is proportional to $y^{\alpha_0}(1-y)^{\beta_0}\,{}_2F_1(A,B;C;y)$, since ${}_2F_1(A,B;C;0)=1$.
+
+\subsection{Connection coefficients and occupation normalization}
+The hypergeometric connection formula \cite[Eq.~15.10.21]{DLMF} at $y=1$ separates a constant term from a term proportional to $(1-y)^{C-A-B}=(1-y)^{-2\beta_0}$. After restoring the prefactor, these are outgoing positive- and negative-energy waves. The coefficient of the positive-energy scalar wave is
+\begin{equation}
+ C_+=\frac{\Gamma(1+2\alpha_0)\Gamma(-2\beta_0)}
+ {\Gamma(1+\alpha_0-\beta_0+i\lambda)\Gamma(\alpha_0-\beta_0-i\lambda)}.
+ \label{eq:connection}
+\end{equation}
+The initial negative-energy eigenvector has $\sigma_1$ expectation $-(p-a)/\omega_-$, while the final positive-energy eigenvector has expectation $(p+a)/\omega_+$. Their squared $|+_x\rangle$ components are therefore
+\begin{equation}
+ |\langle+_x|u_{-,\mathrm{in}}\rangle|^2=\frac{\omega_--p+a}{2\omega_-},\qquad
+ |\langle+_x|u_{+,\mathrm{out}}\rangle|^2=\frac{\omega_++p+a}{2\omega_+}.
+\end{equation}
+Dividing the scalar transition weight by the outgoing component weight converts it into the normalized spinor occupation:
+\begin{equation}
+ f_p=|C_+|^2\frac{\omega_+(\omega_--p+a)}{\omega_-(\omega_++p+a)}.
+ \label{eq:spinornormalization}
+\end{equation}
+Let $d=\tau(\omega_+-\omega_-)$ and $b_\mp=\lambda\mp d/2$. Both are positive for $m>0$ and $a>0$, because $|\omega_+-\omega_-|<2a$. Applying the gamma-function identities \cite[Eqs.~5.4.3 and~5.5.1]{DLMF}, $|\Gamma(ix)|^2=\pi/[x\sinh(\pi x)]$ and $|\Gamma(1+ix)|^2=\pi x/\sinh(\pi x)$ gives
+\begin{equation}
+ |C_+|^2=\frac{\omega_-}{\omega_+}\frac{b_+}{b_-}
+ \frac{\sinh(\pi b_-)\sinh(\pi b_+)}
+ {\sinh(\pi\tau\omega_-)\sinh(\pi\tau\omega_+)}.
+\end{equation}
+The energy identity $\omega_+^2-\omega_-^2=4pa$ implies
+\begin{equation}
+ \frac{\omega_--p+a}{\omega_++p+a}
+ =\frac{2a-(\omega_+-\omega_-)}{2a+(\omega_+-\omega_-)}
+ =\frac{b_-}{b_+}.
+\end{equation}
+Thus the prefactors cancel exactly in Eq.~\eqref{eq:spinornormalization}, leaving
+\begin{equation}
+ f_p=\frac{\sinh[\pi\tau(a-\tfrac12(\omega_+-\omega_-))]
+             \sinh[\pi\tau(a+\tfrac12(\omega_+-\omega_-))]}
+ {\sinh(\pi\tau\omega_-)\sinh(\pi\tau\omega_+)}.
+ \label{eq:sauterproduct}
+\end{equation}
+Finally $2\sinh x\sinh y=\cosh(x+y)-\cosh(x-y)$ gives Eq.~\eqref{eq:exact}. The cancellation above explains why no additional spin factor appears in the implemented one-channel formula. The opposite constant $\sigma_1$ component gives the same normalized occupation; it is not a second independent channel to be added.
+
+\subsection{Stable evaluation without subtracting large energies}
+Equation~\eqref{eq:exact} is useful analytically but its cosh difference can cancel numerically. Even Eq.~\eqref{eq:sauterproduct} loses precision if its small energy differences are evaluated directly. Since the spectrum is even in $p$, set $r=|p|$, $\Omega_+=\sqrt{m^2+(r+a)^2}$, $\Omega_-=\sqrt{m^2+(r-a)^2}$ and $S=\Omega_++\Omega_-$. The following algebraic rearrangement is derived from Eq.~\eqref{eq:sauterproduct} to improve numerical evaluation. Rationalizing each square root gives
+\begin{align}
+ \delta&=\frac{m^2}{\Omega_++r+a}+\frac{m^2}{\Omega_-+|r-a|},\nonumber\\
+ S&=2\max(r,a)+\delta,\qquad
+ \Omega_+-\Omega_-=\frac{4ra}{S}.\label{eq:rationalized}
+\end{align}
+The two numerator arguments in the product can therefore be computed as
+\begin{equation}
+ x_- =\pi\tau a\frac{S-2r}{S},\qquad
+ x_+ =\pi\tau a\left(1+\frac{2r}{S}\right),\qquad
+ y_\pm=\pi\tau\Omega_\pm.
+\end{equation}
+Evaluate the remaining positive gaps without subtraction:
+\begin{equation}
+ S-2r=2\max(a-r,0)+\delta,\qquad
+ S-2a=2\max(r-a,0)+\delta.
+\end{equation}
+Using $\log\sinh x=x-\log2+\log(1-e^{-2x})$ for $x>0$, the four $\log2$ terms cancel and
+\begin{align}
+ \log f_p={}&-\pi\tau(S-2a)+L(x_-)+L(x_+)-L(y_-)-L(y_+),\nonumber\\
+ L(x)={}&\log(1-e^{-2x})=\log[-\operatorname{expm1}(-2x)].
+ \label{eq:stablelog}
+\end{align}
+The leading term follows from $x_-+x_+-y_--y_+=-\pi\tau(S-2a)$. For tiny $x$, $L(x)=\log2+\log x+O(x)$; for large $x$, $L(x)\to0$. The implementation evaluates the gaps and factors in the logarithmic domain, including the two terms in $\delta$, so neither $m^2$ nor a small numerator argument needs to be formed before taking its logarithm. The public log function returns Eq.~\eqref{eq:stablelog}; the probability function exponentiates it and may underflow to zero. Zero field is handled separately, and unrepresentable kinematic sums are rejected explicitly. The 100-digit comparisons test this numerical rearrangement independently of the differential-equation integrations.
 
 \FloatBarrier
 \begin{thebibliography}{99}
@@ -324,6 +649,12 @@ S. Schmidt, D. Blaschke, G. R\"opke, S. A. Smolyansky, A. V. Prozorkevich, and V
 \bibitem{Schmidt1999}
 S. Schmidt, D. Blaschke, G. R\"opke, A. V. Prozorkevich, S. A. Smolyansky, and V. D. Toneev, Non-Markovian effects in strong-field pair creation, \textit{Physical Review D} 59 (1999) 094005. \url{https://doi.org/10.1103/PhysRevD.59.094005}.
 
+\bibitem{Fedotov2023}
+A. Fedotov, A. Ilderton, F. Karbstein, B. King, D. Seipt, H. Taya, and G. Torgrimsson, Advances in QED with intense background fields, \textit{Physics Reports} 1010 (2023) 1--138. \url{https://doi.org/10.1016/j.physrep.2023.01.003}.
+
+\bibitem{Schubert2024}
+C. Schubert, Pair creation in electric fields, \textit{EPJ Web of Conferences} 301 (2024) 03004. \url{https://doi.org/10.1051/epjconf/202430103004}.
+
 \bibitem{Dumlu2009}
 C. K. Dumlu, Quantum kinetic approach and the scattering approach to vacuum pair production, \textit{Physical Review D} 79 (2009) 065027. \url{https://doi.org/10.1103/PhysRevD.79.065027}.
 
@@ -333,8 +664,23 @@ F. Hebenstreit, R. Alkofer, and H. Gies, Schwinger pair production in space- and
 \bibitem{Fedotov2011}
 A. M. Fedotov, E. G. Gelfer, K. Yu. Korolev, and S. A. Smolyansky, Kinetic equation approach to pair production by a time-dependent electric field, \textit{Physical Review D} 83 (2011) 025011. \url{https://doi.org/10.1103/PhysRevD.83.025011}.
 
+\bibitem{KimSchubert2011}
+S. P. Kim and C. Schubert, Nonadiabatic quantum Vlasov equation for Schwinger pair production, \textit{Physical Review D} 84 (2011) 125028. \url{https://doi.org/10.1103/PhysRevD.84.125028}.
+
 \bibitem{Huet2014}
 A. Huet, S. P. Kim, and C. Schubert, Vlasov equation for Schwinger pair production in a time-dependent electric field, \textit{Physical Review D} 90 (2014) 125033. \url{https://doi.org/10.1103/PhysRevD.90.125033}.
+
+\bibitem{Wang2017}
+Q. Wang, L. B. Fu, and J. Liu, Comparison of quantum kinetic theory and time-dependent Dirac equation approaches in vacuum pair production and the bound states resonance enhanced mechanism, arXiv:1708.08565v1 (2017), preprint. \url{https://arxiv.org/abs/1708.08565}.
+
+\bibitem{LiGong2021}
+Z. L. Li, C. Gong, and Y. J. Li, Study of pair production in inhomogeneous two-color electric fields using the computational quantum field theory, \textit{Physical Review D} 103 (2021) 116018. \url{https://doi.org/10.1103/PhysRevD.103.116018}.
+
+\bibitem{Aleksandrov2024}
+I. A. Aleksandrov, A. Kudlis, and A. I. Klochai, Kinetic theory of vacuum pair production in uniform electric fields revisited, \textit{Physical Review Research} 6 (2024) 043009. \url{https://doi.org/10.1103/PhysRevResearch.6.043009}.
+
+\bibitem{Majczak2024}
+M. M. Majczak, K. Krajewska, J. Z. Kami\'nski, and A. Bechler, Scattering matrix approach to dynamical Sauter-Schwinger process: Spin- and helicity-resolved momentum distributions, \textit{Physical Review D} 110 (2024) 116025. \url{https://doi.org/10.1103/PhysRevD.110.116025}.
 
 \bibitem{Hebenstreit2008}
 F. Hebenstreit, R. Alkofer, and H. Gies, Pair production beyond the Schwinger formula in time-dependent electric fields, \textit{Physical Review D} 78 (2008) 061701(R). \url{https://doi.org/10.1103/PhysRevD.78.061701}.
@@ -359,6 +705,34 @@ E. Akkermans and G. V. Dunne, Ramsey fringes and time-domain multiple-slit inter
 
 \bibitem{Li2014}
 Z. L. Li, D. Lu, B. S. Xie, L. B. Fu, J. Liu, and B. F. Shen, Enhanced pair production in strong fields by multiple-slit interference effect with dynamically assisted Schwinger mechanism, \textit{Physical Review D} 89 (2014) 093011. \url{https://doi.org/10.1103/PhysRevD.89.093011}.
+
+\bibitem{Taya2021}
+H. Taya, T. Fujimori, T. Misumi, M. Nitta, and N. Sakai, Exact WKB analysis of the vacuum pair production by time-dependent electric fields, \textit{Journal of High Energy Physics} 2021 (03) 082. \url{https://doi.org/10.1007/JHEP03(2021)082}.
+
+\bibitem{Aleksandrov2025}
+I. A. Aleksandrov, D. G. Sevostyanov, and V. M. Shabaev, Schwinger particle production: Rapid switch off of the external field versus dynamical assistance, \textit{Physical Review D} 111 (2025) 016010. \url{https://doi.org/10.1103/PhysRevD.111.016010}.
+
+\bibitem{Aleksandrov2026}
+I. A. Aleksandrov, M. A. Dorodnyi, and E. D. Akimkina, Spectral fringes without subcycles in Schwinger pair production and Dirac materials, arXiv:2605.19086v1 (2026), preprint. \url{https://arxiv.org/html/2605.19086v1}.
+
+\bibitem{Dabrowski2016}
+R. Dabrowski and G. V. Dunne, Time dependence of adiabatic particle number, \textit{Physical Review D} 94 (2016) 065005. \url{https://doi.org/10.1103/PhysRevD.94.065005}.
+
+\bibitem{Ilderton2022}
+A. Ilderton, Physics of adiabatic particle number in the Schwinger effect, \textit{Physical Review D} 105 (2022) 016021. \url{https://doi.org/10.1103/PhysRevD.105.016021}.
+
+\bibitem{LiJiang2026}
+Z. L. Li and R. Z. Jiang, Nonadiabatic quantum kinetic approaches for Schwinger pair production in time-varying electric fields with multiple components, \textit{Nuclear Physics B} 1022 (2026) 117256. \url{https://doi.org/10.1016/j.nuclphysb.2025.117256}.
+
+\bibitem{Virtanen2020}
+P. Virtanen, R. Gommers, T. E. Oliphant, et al., SciPy 1.0: Fundamental algorithms for scientific computing in Python, \textit{Nature Methods} 17 (2020) 261--272. \url{https://doi.org/10.1038/s41592-019-0686-2}.
+
+\bibitem{Lambert2026}
+N. Lambert, E. Gigu\`ere, P. Menczel, et al., QuTiP 5: The Quantum Toolbox in Python, \textit{Physics Reports} 1153 (2026) 1--62. \url{https://doi.org/10.1016/j.physrep.2025.10.001}.
+
+\bibitem{DLMF}
+National Institute of Standards and Technology, \textit{Digital Library of Mathematical Functions}, Eqs.~5.4.3, 5.5.1, 15.10.1, and 15.10.21. \url{https://dlmf.nist.gov/5.4.E3}; \url{https://dlmf.nist.gov/5.5.E1}; \url{https://dlmf.nist.gov/15.10.E1}; \url{https://dlmf.nist.gov/15.10.E21} (accessed 5 November 2026).
+
 \end{thebibliography}
 
 \end{document}

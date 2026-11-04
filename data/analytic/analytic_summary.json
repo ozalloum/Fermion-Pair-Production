@@ -1,0 +1,9 @@
+{
+  "modes": 299,
+  "precision_digits": 100,
+  "declared_max_absolute_error": 2.351766343228987e-17,
+  "max_absolute_error": 2.4547756970833982e-15,
+  "max_relative_error_above_1e_300": 4.4959489467587173e-13,
+  "max_normalized_log_error": 4.9187919502316475e-15,
+  "passed": true
+}

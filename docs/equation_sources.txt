@@ -1,0 +1,46 @@
+PairPulse mathematical equation citation verification
+Verified 5 November 2026
+
+Scope
+Equation citations were checked against full primary research papers and the NIST Digital Library of Mathematical Functions. The manuscript contains 50 numbered equations in 51 displayed environments. Intermediate algebra, definitions and numerical error measures are identified below as derivations in the article rather than attributed to an external source that does not contain them. All displayed mathematics is unchanged from the scientifically double-checked manuscript.
+
+Schmidt et al., International Journal of Modern Physics E 7 (1998), 709-722
+DOI: https://doi.org/10.1142/S0218301398000403
+Full text: https://arxiv.org/pdf/hep-ph/9809227
+Manuscript Eq. (1): temporal gauge and field convention, source Eqs. (2)-(3), with kinetic momentum defined following source Eq. (6).
+Manuscript Eqs. (8)-(9): fermionic Bogoliubov transformation and vacuum expectation, source Eqs. (10)-(11); phases are fixed explicitly in the manuscript.
+Manuscript Eq. (20): source Eq. (33), with transverse energy set to m and a finite initial time.
+
+Li, Gong and Li, Physical Review D 103 (2021), 116018
+DOI: https://doi.org/10.1103/PhysRevD.103.116018
+Full text: https://arxiv.org/pdf/2106.04236
+Published text: https://inspirehep.net/files/29a98b3260590f114914982a5441ca9f
+Manuscript Eqs. (3)-(4): explicit one-dimensional specialization of Sec. II.A and Appendix A. Equation (5) is obtained by diagonalizing the stated Hamiltonian; Eq. (7) follows from Hermiticity.
+Manuscript Eq. (6): projection prescription in source Eqs. (13)-(14), omitting its spin sum.
+Manuscript Eq. (23): one-dimensional, one-channel measure corresponding to source Eq. (13), with a separate box-normalization derivation supplied.
+Manuscript Eqs. (11)-(19): explicit Bloch-coordinate derivation and invariant proof; Sec. II.A establishes the underlying Dirac/kinetic equivalence, without asserting that the source uses the identical intermediate coordinates.
+
+Hebenstreit, Alkofer and Gies, Physical Review D 82 (2010), 105026
+DOI: https://doi.org/10.1103/PhysRevD.82.105026
+Full text, journal version: https://arxiv.org/pdf/1007.1099v2
+Manuscript Eq. (2): source Sec. II.C.2, Eq. (77).
+Manuscript Eq. (10): source Eqs. (48)-(50); its spin-summed distribution equals twice the manuscript occupation. Auxiliary variables are identified explicitly.
+Manuscript Eqs. (22) and (46): source Eq. (99), divided by two for one channel at zero transverse momentum; source Eq. (A20) confirms that spin factor.
+Manuscript Eq. (24): dimensionless parameters and Keldysh convention, Sec. II.C.2.
+Manuscript Eq. (27): source Eq. (75), with spin sum removed.
+Manuscript Eqs. (34)-(38): direct Dirac differentiation and variable substitution, consistent with source Eqs. (78)-(84).
+
+NIST Digital Library of Mathematical Functions
+Manuscript Eq. (39), Gauss equation: https://dlmf.nist.gov/15.10.E1
+Manuscript Eq. (41), connection coefficient: https://dlmf.nist.gov/15.10.E21
+Manuscript Eq. (44), gamma moduli and recurrence: https://dlmf.nist.gov/5.4.E3 and https://dlmf.nist.gov/5.5.E1
+The manuscript substitutes its stated parameters into these identities. Equations (40), (42)-(43) and (45) show the associated parameter matching, spinor normalization and algebra.
+
+Derivations and definitions that do not require an invented source attribution
+Equation (21) defines the asymptotic energies. Equations (25)-(26) follow by expansion of the exact Sauter expression. Equations (28)-(29) define the numerical discrepancies and conservation diagnostics. Equations (30)-(32), including the intervening unnumbered definitions, derive the error decomposition from the trapezoidal weights and triangle inequality. Equation (33) and Eqs. (47)-(50) derive the stable numerical rearrangement algebraically from the exact spectrum.
+
+Additional interpretation
+Dabrowski and Dunne, Physical Review D 94 (2016), 065005, supports the discussion of finite-time basis dependence: https://doi.org/10.1103/PhysRevD.94.065005 .
+
+Verification limits
+This is an equation-source and convention check. It does not assert that every intermediate expression is printed verbatim in a cited paper, or that finite numerical tests prove accuracy for arbitrary fields. The bibliography retains the earlier literature discussion; the verification here concerns the mathematical sources listed above.

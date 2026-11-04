@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+build/
+*.aux
+*.log
+*.out
+*.synctex.gz
+/Computational_materials/regenerated/
+/Computational_materials/redrawn/
+/Computational_materials/validation/
+/Computational_materials/notebook-output/
